@@ -191,11 +191,13 @@ Keep your answer short \~ 3 sentences
 Describe what a working directory is, why R needs us to define it, and write the function to find the current working directory in R.
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+The **working directory** is a file pathway on your local drive that establishes a default location for R to source and deposit files. R needs a working directory so that it knows where to search for the desired files from.
+
+Reference: <https://bookdown.org/ndphillips/YaRrr/the-working-directory.html>
 :::
 
 ```{r find-working-dir}
-# code here
+getwd() # This function shows the pathway on your local drive to your current directory
 ```
 
 ### 1d.2. Utility of the working dir
