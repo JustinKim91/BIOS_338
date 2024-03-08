@@ -183,7 +183,11 @@ References:
 Give 1 or 2 error messages you encountered along the process of solving this exam and explain how you interpreted and troubleshooted them
 
 ::: {.class style="color: firebrick;"}
-Keep your answer short \~ 3 sentences
+Error in tibble(a1 = -5:10, a2 = exp(a1)) :
+
+could not find function "tibble"
+
+I encountered this error message in question 4 part 4 when troubleshooting the tibble code. In this case, the error arose from R being unable to find the tibble() function. This made it clear that the library containing tibble (tidyverse) was not loaded; thus I wrote library(tidyverse) into the code and commented it out so that if the code chunk was run multiple times, R would not attempt to load tidyverse packages each time.
 :::
 
 ### 1d. Working directory
@@ -202,7 +206,20 @@ getwd() # This function shows the pathway on your local drive to your current di
 
 ### 1d.2. Utility of the working dir
 
-Demonstrate the loading of a `csv` file by writing a path relative to (starting from) R's current working direcotory in an R chunk below. Discuss the convenience of this compared to an [absolute path](https://networkencyclopedia.com/absolute-path/)
+Demonstrate the loading of a `csv` file by writing a path relative to (starting from) R's current working directory in an R chunk below. Discuss the convenience of this compared to an [absolute path](https://networkencyclopedia.com/absolute-path/)
+
+```{r relative_path}
+# library(tidyverse) to load tidyverse as I intend to read the csv using read_csv() for a tibble
+
+read_csv("../../Data/histdata.csv") # Since I found the working directory in 1d., I located a csv file in folder a few steps prior to the # ...current directory. To read this file I used the ../ notation to denote one directory up; I used this twice, to move two folders back
+# ...and access the Data folder which contained the csv file. 
+```
+
+::: {.class style="color: firebrick;"}
+There are several benefits to a relative path over an absolute path. For one, when manually rearranging the local files in file explorer, because the relative path does not rely on the entire file path from the system to the desired destination, the rearrangements are less likely to cause the code to break. To address this issue with an absolute path, you would have to edit/verify each directory in the file path, whereas in a relative path, you can simply base the path from the working directory which often makes the path more readable as well.
+
+Reference: <https://networkencyclopedia.com/relative-path/>
+:::
 
 ### 1d.3. bonus. working directory vs quarto [(+1 point)]{style="color: red;"}
 
@@ -214,13 +231,32 @@ How does the working directory differ between `.qmd` scripts and normal `.R` scr
 
 What is a package in R? How do you install and load packages? How do you find the documentation for a package?
 
+::: {.class style="color: firebrick;"}
+A package is a collection of objects, functions, data, and code. Packages are compiled with specific purposes and thus offer specific functions. To install a package you would use the install.packages( ) function; the argument for the function should be the name of the desired package in quotes. To load the package, you would use the library( ) function with the argument being the name of the package, but this time, the quotes are not necessary. To find the documentation for a package you could use the **Question Mark operator** again, but with a slight modification. You would type "?*package::object_in_package*". See example below.
+:::
+
+```{r package_documentation_example}
+# To find the documentation for the as_tibble() function in the tibble package
+
+?tibble::as_tibble # This specifies the package as tibble and the double colons indicates that the as_tibble() is an object within tibble
+```
+
 ### 1e.2.bonus: Install R package form github
 
 BONUS: How can you install a package that is not on CRAN? (for example, on github) ; *there's a direct function or a more manual approach, show either of these approaches for the* `ggbeeswarm` *package*
 
 ```{r install-from-github}
-#
+# install and load devtools package to access the install_github() function
+# install.packages("devtools")
+# library(devtools) 
+
+install_github("eclarke/ggbeeswarm") # The eclarke is the username of the author on github and ggbeeswarm is the name of the repository
+library(ggbeeswarm)
 ```
+
+::: {.class style="color: firebrick;"}
+Reference: <https://support.datacamp.com/hc/en-us/articles/360006286174-Installing-R-Packages-Not-Hosted-on-CRAN>
+:::
 
 ### 1f. assigning to a variable vs not
 
@@ -230,8 +266,9 @@ Explain why does assignment hide the result of the calculation in R, find a cita
 Answer here!
 :::
 
-```{r}
+```{r assignment}
 # 
+
 ```
 
 ## 2. Creating datasets. [(7 point)]{style="color: red;"}
