@@ -1,0 +1,319 @@
+---
+title: "Assignment4"
+format: html
+editor: visual
+---
+
+Assignment 4, due Saturday, midnight. *Email me if you need more time as always!*
+
+Changelog: Mon_12/2/24: \[bonus on installing packages, fixed typos, clarified factors, Kable printing\]
+
+# **Instructions**
+
+-   Total = 14 points + 6 bonus. *Most questions are 0.25 point each but Q5-8 have the bulk of the points* 😉
+
+-   Cite your sources by pasting links below the answers to each question. Acknowledge collaborators in the credits at the beginning and attribute any general sources of inspiration at the end.
+
+**Goal:** This assignment is meant to make you get hands-on practice the R content at your own pace. Do take the time to review the slides, `.R` worksheet and re-watch lectures if you need, to recall topics mentioned in the course and the in-class activity.
+
+**Format:** Please type out your answers within R chunks in this `.qmd` (quarto markdown) script, **along with comments added below or next to the code to concisely and clearly explain your answer** / steps taken. \_If relevant, make short comment next to the line of code with `#…`. **Please make sure to run and test the `R` chunks in RStudio before submission.** If possible, try to `knit`/`Render` the document into the `.html` output format and submit this along with the `.qmd` file on Canvas. In short: **upload the `.qmd` script + `.html` output (*optional*) as a file attachments on canvas.**
+
+**Make sure to change the filename to include your first name as a suffix `assignment4_NAME.qmd`**
+
+**Bonus**: (***NEW***) Bonus 0.x series questions check for basic understanding/fundamentals/ topics mentioned previously as an opportunity for anyone who didn't understand these previously to catch up by reading on them and demonstrating learning. *If you already knew the answer well enough, you can skip these bonus questions and spend time more effectively on the harder bonus questions!* 😉
+
+Other bonus questions make you go beyond the material covered in the class, and would require self exploration, i.e.) searching the Internet, parsing out correct answers, and understanding them enough to solve it. Hence *documenting your sources and proper explanation is very important for bonus questions*. **Any points beyond the maximum for in this assignment will carried over to your course grade**
+
+## Scope
+
+This assignment is meant to be a guide to exploring your data with data wrangling (`dplyr`) and visual inspection (`ggplot`). Read more about exploratory data analysis [here](https://r4ds.had.co.nz/exploratory-data-analysis.html). *The material in this homework was covered in these lectures -*
+
+-   Tidyverse: class 6, 7
+
+-   ggplot: class 8
+
+## Resources for extra help (strongly recommended)
+
+1.  [Interactive tutorial](https://allisonhorst.shinyapps.io/dplyr-learnr/) to brush up `dplyr` functions such as `mutate()`, `filter()`, `arrange()` and others. I strongly recommend going through this exercise step-by-step for gaining confidence. Link - <https://allisonhorst.shinyapps.io/dplyr-learnr/>
+2.  Markdown formatting [cheatsheet](https://www.markdownguide.org/cheat-sheet/)
+3.  [TED talk](https://www.youtube.com/watch?v=hVimVzgtD6w&t=155s), Hans Rosling. This is a great introduction to the gapminder data, the inspiration behind it and inspires you for any visualization you would like to make for Q8!
+
+## Credits for collaboration
+
+*Please list your collaborators here with their key contribution summarized in a short sentence. For example -*
+
+> **Annie**: Ideas for data-set and a few questions
+>
+> **Sam**: Quality control
+
+# Questions
+
+## Q0. Loading libraries and data
+
+***Bonus 0.a.** (0.25 point each x 3)*
+
+-   *Explain why we need to use* `library()` *command in one sentence with a citation;*
+
+-   *where is* `install.packages()` *installing the gapminder package from?*
+
+    -   *Hint: Which of these two commands do you require the internet to run?*
+
+-   Complete the comments next to the code in the `R` chunk below
+
+```{r libraries}
+library(tidyverse) # add comment on package purpose..
+
+# Explain this (below) for Bonus (0.5 points)
+pkg_to_load <- 'gapminder'
+if (!require(pkg_to_load, character.only=T, quietly=T)) {
+    install.packages(pkg_to_load)
+    library(pkg_to_load, character.only=T)
+}
+```
+
+*Hint for the bonus - https://stackoverflow.com/a/25409306/9049673*
+
+### Data for this work
+
+1.  `midwest` : We will use the data set `midwest` containing demographic information of midwest counties from the 2000 US census. Reference: [ggplot2](https://ggplot2.tidyverse.org/reference/midwest.html)
+
+2.  `gapminder` : This data contains the population and GDP per capita of multiple countries, and continents across years (1952 - 2007). Reference: [CRAN](https://cran.r-project.org/web/packages/gapminder/vignettes/gapminder.html)
+
+Please read the references and make sure you understand what the data generally represents and what the column names stand for! *This makes interacting with the data and the R commands a lot more intuitive.*
+
+### Loading data
+
+1.  Load the data from the gapminder package (0 points)
+
+-   Hint: answer is written below. Explain briefly what is actually occurring and the purpose of writing it this way. **You need to explain the difference in the 3 `gapminder` words used here...**
+
+-   If that is too confusing, use your own method to load the data 🙂
+
+```{r load_data}
+gapminder <- gapminder::gapminder # what does this do?
+```
+
+2.  Load the midwest dataset from the ggplot2 package (0.25 points)
+
+*Make your own code chunk and load the midwest dataset here*
+
+------------------------------------------------------------------------
+
+## Q1: Histograms
+
+Create 2 histograms, one showing `percbelowpoverty` (% of people below poverty line) and one showing `percollege` (% of people college educated) (*0.5 points)*
+
+```{r histograms}
+
+```
+
+Display both graphs at the same time using the `patchwork` package (*0.25 points)*
+
+*Here's hints for how to use [patchwork](https://patchwork.data-imaginist.com/articles/patchwork.html) to [assemble](https://patchwork.data-imaginist.com/articles/guides/assembly.html) plots*
+
+```{r assemble_patchwork}
+
+```
+
+*Describe the patterns in the histograms in one short sentence each.* (0.25 points)
+
+## Q2: Scatter plot
+
+You now wish to explore the relationship between poverty and college degrees. To do this, we create a scatterplot of `percbelowpoverty` vs. `percollege`. Color the data-points by the `inmetro` *(0.5 points)*
+
+You will need to use `as.factor()` for the `inmetro` column.
+
+Hint: *Read about `factors`[here](https://r4ds.hadley.nz/factors.html) ; Look back at the data source to remind yourself of what the `inmetro` column stands for!*
+
+```{r scatterplot}
+
+```
+
+Why do we need to use `as.factor()` above for the `inmetro` column? Plot what happens if you don't use this and why the graph is not the most appropriate (*even though it works ok..*) to answer this question (*0.25 points)*
+
+```{r why-factor}
+
+```
+
+(***Bonus 2.b/**+0.25 points)* Can you modify the factor version of the `inmetro` column's levels to be more informative than 0 and 1? *For this, it would be best to add a new column to the dataset with factor version and use this in the ggplot* *command*
+
+```{r modifying_factor}
+
+```
+
+Now you wish to change the shape of data points based on the state to add another dimension to your data.
+
+-   So first find out how many states are present in your dataset
+
+-   Make the shape a part of the visualization (*0.25 points*)
+
+```{r scatter_size}
+
+```
+
+The default shapes chosen are not the best, so alter the shapes used to represent each state manually (*0.25 points*)
+
+*Hint: The last example in the [ggplot::scale_shapes](https://ggplot2.tidyverse.org/reference/scale_shape.html) documentation lists all the available shapes and the page shows how to control the shapes*
+
+```{r manual_shape}
+
+```
+
+Create another scatterplot, this time adding adding a geom_smooth line. (0.25 points)
+
+```{r smooth_fit}
+
+```
+
+Describe the pattern you see with the data. What story is the data telling? (*0.25 points*)
+
+### Bonus 2.c: Customized legend
+
+Rename the legend for `inmetro` to be more intuitive and explanatory than 0 & 1 with a longer phrase for each if necessary (*0.25 points*)
+
+```{r legend_gymnastics}
+
+```
+
+## Q3: simple barplot
+
+Find the average population density across all counties. Create a new column that tells if a county is above or below average population density using `mutate()`. *(name it something like above_density).* (*0.25 point*)
+
+```{r data_wrangling}
+
+```
+
+Create a barplot that shows how many counties are above and below the average. *Hint: you should have 2 boxes (0.25 point)*
+
+(***Bonus 3.a.**/+0.25 points)* Overlay text near the bar with the value indicated by the bar using `geom_text`/other annotations (reference: [R4ds book](https://r4ds.hadley.nz/communication.html#annotations))
+
+```{r barplot}
+
+```
+
+Color the counts in the bars by state. *(0.25 point)*
+
+```{r colourbarplot}
+
+```
+
+### Bonus 3.b: mean for each state
+
+Find the mean for EACH STATE and repeat the above question, with the above_mean_density specific to the state the county is found in. (*0.75 point)*
+
+*Hint:* need to use `group_by()`
+
+------------------------------------------------------------------------
+
+## Q4: Inspect the gapminder data
+
+When you get any data, it is a good idea to know the column names, approximate size of data such as number of rows and columns. *Did you do this for the previous dataset?* 😏
+
+What is one of the R command that let's you do this for the gapminder data? (*0.25 point*)
+
+```{r know_thy_data}
+tibble(gapminder)
+```
+
+Investigate the average life expectancy for the most recent year for each continent. A nice way to make tables in .Rmarkdown files or Quarto files is with the `knitr::kable()` function! Please look at the reference [here](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html). Make a table using the `kable()` table to show this data. Use head(gapminder) so you don't print all the rows (*0.5 point*).
+
+*hint: the question states the most recent year, which means your code for this answer should be robust even when the data is updated!* 😄 (**Bonus 4.a/**0.5 points for doing this correctly)
+
+```{r summarize_health}
+library(knitr)
+knitr::kable(head(gapminder[,c(1,3,4)],n=10), "pipe")
+```
+
+What is the population distribution across continents in the year 2007? Show the total population
+
+Find and display the countries with the top 5 GDP per capita and top 5 total GDP (*0.5 point*)
+
+```{r top5s}
+
+```
+
+## Q5: Visually inspect the gapminder data
+
+Play with the data and make 2 time-series plots to get a feel for your your favorite country's data over time *(x axis is time variable, y axis anything else) (1 point*)
+
+```{r visual_eda1}
+
+
+```
+
+Are the healthiest countries also the wealthiest? Answer this with top 5 numbers + visually/ however you see fit (*1.5 point*)
+
+*Hint: Health \~ Life expectancy ; Wealth \~ GDP per capita. We are expecting data / graph + one line of analysis/commentary here.*
+
+```{r healthy_wealthly_and_wise}
+
+
+```
+
+## Q6: Data wrangling for real now
+
+Can you rearrange the rows to emphasize the data of countries with the poorest health outcomes in the most recent year? To answer this, arrange the data in descending order of year and ascending order of life expectancy. Once again please use the `kable()` to print a pretty table (*0.5 point)!*
+
+```{r arragement}
+
+```
+
+We would like to see a similar view for the least healthy countries in each continent. Since continents which have more people carry more weight, we would like to place the most populous continents in the top and go on descending order for the rest of the continents (*1 point*)
+
+```{r complex_arrangement}
+
+```
+
+Now subset the data to get the 5 least healthy countries in each continent (*0.5 points*)
+
+```{r unhealthy5}
+
+```
+
+## Q7: The best scatter plot ever
+
+This is the plot that reveals the true power of ggplot, as we try to use it to plot as much data as possible in 4 dimensions.
+
+Let us investigate the relationship between **health** and **wealth** of the countries in 2007 with more details. We would like to identify the data points with the **continent** (by **colour**), but also give more visual weight to countries with a higher **population** (by **size**) (*2.5 points)*
+
+```{r all_you_can_scatter}
+
+```
+
+## Q8: The canvas is yours
+
+The gapminder data along with an elaborate interactive [visualization](https://www.gapminder.org/tools/#$chart-type=bubbles&url=v1)tool is operated by the gapminder foundation (<https://www.gapminder.org/>).
+
+Watch this 20 minute [TED talk](https://www.youtube.com/watch?v=hVimVzgtD6w&t=155s) by Hans Rosling to get inspired and make any plot that strikes your creativity using the ggplot's canvas (2.5 points)
+
+In this talk, Hans Rosling, an epidemiologist by training does some magic using data visualizations and animations to turn dry data into a compelling lecture
+
+**Points:** *Creativity: 0.75, Informative: 1, Visually appealing: 0.75*
+
+*Note: Plots that are not very informative / not visually appealing will have points deducted. Also don't make too easy of a plot or too similar to other plots here!*
+
+## Bonus 9: animating data across time
+
+Similar to the plots you saw in the TED talk, add animations to make your plots update for the data across years using the `gganimate` package (2 points)
+
+*Rubric: No documentation of sources loses 1 point here.*
+
+## Extras
+
+In this long journey, we have used many a dplyr and ggplot functions. Take some time to rejoice your achievements by marking the concepts that you now understand. It would be useful to highlight these concepts / add notes by personalizing the dplyr and ggplot cheat-sheets 😄
+
+------------------------------------------------------------------------
+
+# Attributions
+
+For the questions, I would like to acknowledge these sources of inspiration
+
+-   [Gapminder](https://cran.r-project.org/web/packages/gapminder/index.html) dataset.
+
+-   Exercises from [appsilon.com](https://appsilon.com/r-dplyr-gapminder/) by Dario Radečić
+
+-   Annie's questions on `midwest` data
+
+For the solutions
+
+..
