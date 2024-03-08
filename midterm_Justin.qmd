@@ -1,0 +1,527 @@
+---
+title: "Midterm exam"
+format: 
+  html:
+    embed-resources: true # +1 bonus point for explaining why we have this
+editor: visual # The purpose of the embed-resource is to bundle all content such as embedded images or code as one HTML file.
+---
+
+# Midterm
+
+::: {style="color: teal"}
+Space for TA/grader comments here!
+
+(Note to TAs: copy this in the middle of the code for more elaborate comments)
+:::
+
+**Change log**:
+
+-   2/Mar/24: 1 pm. Updated points to 60 total (previously 55) adding questions 1e2, 1f, 4.d
+
+-   2/Mar/24: 7 pm. Fixed rendering to generate a standalone html file, clarified format
+
+## Prologue
+
+This exam is meant to test these topics you have learnt in the last two months while serving as practice to brush up these concepts. We anticipate this to be at the same complexity/time commitment as a homework assignment, so treat this as a **learning opportunity** where you have all the resources at your disposal **including office hour help** to help you grasp this content. **25% of the points** will be given **in each question** involving `R` for providing short explanations (and **documentation** in code) that **demonstrate that you understand** what the R code you wrote does.
+
+Please remember that **there are many ways of answering the R questions**, and all approaches are valid for grading. *If you tried and couldn't answer any question, partial points will be given if you add enough explanation to indicate that you are on the right path.* If you are having trouble understanding or interpreting any question or believe you spent too long lost in a wrong direction, please do reach out to the TAs/discuss with peers/post on the discussion board/come to office hours. If you **need extra time** to do this exam **for any reason** please don't hesitate to email Prashant with the subject `BIOS 538:`
+
+Emphasis will be on the later half that uses the more efficient vectorized functions from the `tidverse` ecosystem, contrasting this to more verbose approaches such as `for ()` loops and `if ().. else` statements from the first few lectures. These are the learning goals from this exam:
+
+-   Making and using functions + documentation using [roxygen2](https://roxygen2.r-lib.org/articles/rd.html#basics) style comments is very useful.
+
+-   Vectorization is better than for loops : a) in a normal function b) within a dplyr chain
+
+-   Making informative plots with proper axis labels, titles, orientation and annotations is handy to communicate more effectively.
+
+## Format : submit **both `.qmd` script + `.html` output**
+
+-   Make sure to **change the filename** to include your **first name** as a suffix, such as **`midterm_prashant.qmd`**
+
+-   Please type out your **code within R chunks** in this `.qmd` (quarto markdown) file
+
+    -   along with **documentation above or next to the line of code** to **concisely** explain the purpose of the line**.**
+
+-   ::: {.class style="color: firebrick;"}
+    Add overall comments/text to explain your solution *where relevant,* such as steps taken to attempt the answer etc. especially when you didn't get the intended result.
+
+    *You can copy the first 2 words from any comment and paste it to make a box of this reddish text so TAs can see your answers quickly between the question text.*
+    :::
+
+-   **Please make sure to run and test the `R` chunks in RStudio before submission.** Ensure that the file renders into a `.html` of \>= 1MB file.
+
+-   `Render` the document into the `.html` format and submit this along with the `.qmd` file on Canvas
+
+    -   If you are unable to render due to errors in the code, you can add the option `#| eval: false` as the first line below the `{r ..}` in the chunk giving the error (*see Q4 chunks for example*) to prevent it from being run while rendering (*this way the TAs can still see your partially working code for evaluation)*. Or you can change your R code into comments (but this will be harder to read)
+
+-   Cite your sources by pasting links below the answers to each question. Acknowledge collaborators in the credits at the beginning and attribute any general sources of inspiration at the end.
+
+## Resources
+
+1.  Use this [section](https://r4ds.hadley.nz/quarto.html#visual-editor) for a refresher if you are having trouble navigating the quarto file, or doing actions making a code chunk etc.
+2.  [Interactive tutorial](https://allisonhorst.shinyapps.io/dplyr-learnr/) to brush up `dplyr` functions such as `mutate()`, `filter()`, `arrange()` and others. I strongly recommend going through this exercise step-by-step for gaining confidence. Link - <https://allisonhorst.shinyapps.io/dplyr-learnr/>
+3.  Markdown formatting [cheatsheet](https://www.markdownguide.org/cheat-sheet/)
+
+## Points distribution
+
+|       | 0       | Q1  | Q2  | Q3  | Q4  | Q5  | Q6  | Q7  | Q8  | sum |
+|-------|---------|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+| Reg   | \-      | 10  | 7   | 9   | 8   | 12  | 6   | 3   | 5   | 60  |
+| Bonus | 1+2 + 1 | 2   |     |     |     | 2   | 2   | 3   | 1   | 14  |
+
+```{r loading-packages, warnings = FALSE}
+library(tidyverse) # for dplyr, pipe and ggplot stuff
+```
+
+# Questions
+
+## 0.bonus. Best practices [(2 points)]{style="color: red;"}
+
+Follow these best practices when writing your code and text for the document for a bonus
+
+-   Label your `{r}` chunks with something short and informative using `-` as the separator between words
+
+-   Ensure your code is [tidyverse style guide](https://style.tidyverse.org/syntax.html) compliant to make it more readable by incorporating the tips; or use the [styler](https://r4ds.hadley.nz/workflow-style) to automatically do this before submission. For example:
+
+    -   spaces after the `# ..` for comments
+
+    -   spaces before the `+` for `ggplot(..) +`
+
+    -   indent your code to make the most sense for things on the same line, for example
+
+```{r explain-indent-choices}
+ggplot(df, aes(a1, a2)) + # keeping it short when few options
+  geom_point()
+
+ggplot(df, 
+       aes(a1, a2, # expanding into newer lines when there's more options
+           colour = a3, shape = a4, # similar things grouped together
+           frame = a5)) + 
+  geom_point() + 
+  geom_line()
+
+```
+
+## 1. Check your understanding [(10 points)]{style="color: red;"}
+
+(\~ [1 point]{style="color: red;"} for each question x 10 + 2 bonus)
+
+### *1a. Quarto vs `.R`*
+
+*Explain in your own words what an R Markdown/Quarto file is compared to a normal R script. Give one benefit of using these types of files.*
+
+::: {.class style="color: firebrick;"}
+An R Markdown or Quarto file is an extension of R that allows for the integration of plain text and code chunks. These files can be can be formatted as HTML, PDF, or MS files. R Markdown and Quarto also allow for the integration of figures such as images in the document. The main difference between Rmd and Quarto is that Rmd is tied to the R language, while Quarto files support the usage of various languages such as Python, Javascript, or Julia.
+
+References: <https://quarto.org/docs/faq/rmarkdown.html>
+
+<https://rmarkdown.rstudio.com/articles_intro.html>
+:::
+
+### *1b. Documentation*
+
+Why do we have to add documentation to our code? Who is the typical target audience of this code + documentation effort?
+
+::: {.class style="color: firebrick;"}
+The purpose of the documentation in our code is to explain what the code does. Furthermore, the documentation can provide insight into the thought process and reasoning for the written code. In this sense, the target audience of our code can either be our future selves—so that we can edit or pick back up where we left off—or others who will read through our code with the intention of learning or replicating our work.
+:::
+
+### *1b.2. Documentation in R*
+
+Grab 3-5 lines of R code from any HW or write some R code to demonstrate how you would document the code with comments very thoroughly for every line and code action.
+
+Make an R chunk for demonstrating this below
+
+::: {.class style="color: firebrick;"}
+gap_gdp \<- gap_temp %\>% mutate(gdp = gdpPercap\*pop) %\>% \# Mutate temporary vector to display total gdp filter(year ==2007) gap_gdp
+:::
+
+### 1b.3. Documenting R functions
+
+Now do the same with another R chunk below for demonstrating how to add documentation to an R function (from HW/write any function *that does more than calling a single in-built function*). Your documentation should use [roxygen2](https://roxygen2.r-lib.org/articles/rd.html#basics) style comments.
+
+### 1c. Troubleshooting
+
+Name and cite two ways to interrogate your R code or function to understand what it is doing and also to troubleshoot errors.
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+### 1c.2. Troubleshooting practicals
+
+*We would like to know what is your workflow when R gives an error.*
+
+Give 1 or 2 error messages you encountered along the process of solving this exam and explain how you interpreted and troubleshooted them
+
+::: {.class style="color: firebrick;"}
+Keep your answer short \~ 3 sentences
+:::
+
+### 1d. Working directory
+
+Describe what a working directory is, why R needs us to define it, and write the function to find the current working directory in R.
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+```{r find-working-dir}
+# code here
+```
+
+### 1d.2. Utility of the working dir
+
+Demonstrate the loading of a `csv` file by writing a path relative to (starting from) R's current working direcotory in an R chunk below. Discuss the convenience of this compared to an [absolute path](https://networkencyclopedia.com/absolute-path/)
+
+### 1d.3. bonus. working directory vs quarto [(+1 point)]{style="color: red;"}
+
+How does the working directory differ between `.qmd` scripts and normal `.R` scripts/`Console`. Demonstrate this by calling the function to know the working dir and add screenshots
+
+(*you can add images to this document easily - go to a new line and using the `/`, start typing `image` and select from the list; enter the path where your screenshot image is stored such as* `img/workin_dir_qmd.png` \~ *not that this path is also relative to the qmd*.. (*it's meta, I know* 😏*)*
+
+### 1e. R packages
+
+What is a package in R? How do you install and load packages? How do you find the documentation for a package?
+
+### 1e.2.bonus: Install R package form github
+
+BONUS: How can you install a package that is not on CRAN? (for example, on github) ; *there's a direct function or a more manual approach, show either of these approaches for the* `ggbeeswarm` *package*
+
+```{r install-from-github}
+#
+```
+
+### 1f. assigning to a variable vs not
+
+Explain why does assignment hide the result of the calculation in R, find a citation for this statement. Demonstrate two contexts where you observe this behavior
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+```{r}
+# 
+```
+
+## 2. Creating datasets. [(7 point)]{style="color: red;"}
+
+### 2a. Make a tibble [(1 point)]{style="color: red;"}
+
+Let's create a dataset. First, create a tibble from the vectors below. The named column order of the tibble should be :
+
+-   the first names
+
+-   the last names
+
+```{r make-tibble}
+first_names <- c("Albert", "Jane", "Linus", "Carl", "George", "Jennifer")
+last_names <- c("Einstein", "Goodal", "Pauling", "Marx", "Church", "Doudna")
+
+```
+
+### 2b. Adding a column [(2 *points*)]{style="color: red;"}
+
+Now, using a `mutate()` call, randomly (from a *uniform distribution*) assign an age **as an integer** between 30-85 for each person, as another column to your data called **age**. **Do not touch the `set.seed` function, that is for grading!**
+
+```{r}
+set.seed(2292025) #Do not edit!
+
+
+```
+
+### 2c. if..else/conditional computations on a column [(4 points)]{style="color: red;"}
+
+Now, you want to do some conditional computation to tell the favorite scientist of the person in each row based on their age. These are the rules to decide the favorite scientist based on the age ranges of the person, in the format: `age condition` =\> `fav_scientist`
+
+-   Age between 30-39 =\> Francis Arnold
+
+-   Age between 40-49 =\> Louis Pasteur
+
+-   Age \> 49 =\> Isaac Newton
+
+You need to use only **ONE of the two approaches** below as you prefer. *I would recommend you try out the vectorized approach first, and leave your code in to get +1 bonus point and feedback of where you went wrong even if you moved onto approach 2.*
+
+***Note**: If you are getting errors, you can convert the code into a comment : by selecting and pressing `ctrl + shift + c`* ; this will ensure that graders can see your attempt for approach 1 without letting the errors hold up the rendering of the document!
+
+#### Approach 1 : Vectorized
+
+The most efficient way is to use a vectorized [`case_when()`](https://dplyr.tidyverse.org/reference/case_when.html) function to generate the new column (*please lookup the documentation of this function!) / use the alternate approach below*
+
+```{r case-when}
+# case_when()
+
+```
+
+#### Aproach 2: using `for()` and `if()..else` workflow
+
+If you are not able to use `case_when()` or want to try a more familiar approach, you can use this approach to iterate on each row using a `for ()` loop and apply a few `if()` conditions and an `else` statement to achieve the same goal. This approach closely mimics the discussion in the review session (`for-if-else` [chunk](https://github.com/BIOS-538/class-worksheets/blob/1caa8a63fac3e291064ab051236fb55f7fcc208d/scripts/Review_Session_Solutions.qmd#L124))
+
+```{r if-else}
+# if..else
+```
+
+## 3. Working with existing datasets [(9 point)]{style="color: red;"}
+
+### 3a. Know thy data [(1 point)]{style="color: red;"}
+
+We will be working with data about sleeping mammals. Write 1-2 sentences describing what the dataset contains and what the columns mean.
+
+<https://rdrr.io/cran/ggplot2/man/msleep.html>
+
+```{r}
+sleeping_data <- msleep # reassign a more intuitive name
+sleeping_data 
+```
+
+### 3b.1. Make a scatter plot [(2 *points*)]{style="color: red;"}
+
+Next, create a scatterplot using the "sleep_total" column and the "bodywt" column. Color the data points by "vore" column (this describes the diet of the species).
+
+Make the legend caption say "Diet"
+
+Make the x axis "Log of body weight"
+
+Make the y axis "Total Sleep"
+
+Make the size of the dots the size of "brainwt". Add a best fit regression line. (hint. if the graph looks weird, try log transforming the bodywt variable)
+
+##### (note: some data points will be removed. that is ok)
+
+```{r}
+
+```
+
+### 3b.2. Add facet based on "vore" [(2 points)]{style="color: red;"}
+
+Make the same plot, but facet based on the `vore` column (`facet_..` splits the plot into subsets for each unique value in `vore` and puts them in side-by-side plots)
+
+```{r}
+
+```
+
+### 3b.3. Show patterns [(2 points)]{style="color: red;"}
+
+To emphasize patterns in the data, fit a `linear regression` line using the `geom_smooth()` function. *Note that you need to add a parameter in the* `method =` *argument to make it linear rather than a curved line.*
+
+### 3b.3. Discuss patterns [(2 points)]{style="color: red;"}
+
+Do any patterns emerge, how strong is the relationship? If you think there is a relationship, using logic, why do you think this occurs? If you don't think there is a relationship, why do you think there is no relationship?
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+## 4. Troubleshooting [(8 *points,*]{style="color: red;"} 2 per question[)]{style="color: red;"}
+
+The following three code chunks do not work. In simple language tell us
+
+-   What the code was supposed to do, (*mention if this invalid)*
+
+-   Why they do not work,
+
+    -   how the error message makes sense (*even if the error doesn't say why the code didn't work, it tries to give a hint),*
+
+-   Show how you debugged the code to figure out the mistake
+
+-   and then fix the error to make code chunk work
+
+```{r troubleshoot-1}
+#| eval: false
+
+# First write what you think this code is supposed to do
+x <- 7 
+if(x > 10) {
+  print("x > 10")
+ else { # Need to add } in front of else to make continue the statement
+  print("x <= 10")
+ }
+```
+
+::: {.class style="color: firebrick;"}
+T. The code for the if statement will conclude at the end of the line with the closing of the curly brace. Since this code chunk begins the else statement on the next line, it does not recognize the else statement as an extension of the original if statement. Thus, in order to incorporate the else statement, you must add the } to the front of the else clause. The following code chunk fixes the issue.
+
+Reference: <https://stackoverflow.com/questions/15586566/if-statement-in-r-can-only-have-one-line>
+:::
+
+```{r troubleshoot-1_fixed}
+#| eval: false
+
+
+x <- 7 
+if(x > 10) {
+  print("x > 10")
+ } else {
+  print("x <= 10")
+ }
+```
+
+```{r troubleshoot-2}
+#| eval: false
+
+rnorm(n = 3, var = 1)
+```
+
+::: {.class style="color: firebrick;"}
+The second argument of the rnorm function should be sd and not var. The rnorm function does not recognize the argument var.
+
+Reference: <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/Normal>
+:::
+
+```{r troubleshoot-3}
+#| eval: false
+
+gender <- factor(c("female", "female", "male", "female", "male"))
+
+Mean(gender)
+```
+
+*There are also certain scenarios where the code gives no error but it just doesn't do what you would expect it to do, the example below is in this category. You need to understand the intent of this code, explain why it doesn't do the intended thing and fix it..*
+
+```{r troubleshoot-4}
+a <- tibble(a1 = -5:10, a2 = exp(a1)) # Open tidyverse library first --> library(tidyverse)
+
+ggplot(a, aes(a1, a2, colour = 'blue')) + 
+  geom_point() + geom_line()
+
+
+```
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+## 5. Make a better ggplot [(12 points)]{style="color: red;"}
+
+This is a beginner plot that tries to explore how each mammal's sleep duration depends on their phylogenetic order. Your goal is to improve this plot to make it easier to grasp + more informative!
+
+```{r original-ggplot}
+
+# Sleeping labels on a sleeping plot, with a y axis that makes my head tilt
+ggplot(sleeping_data, aes(order, sleep_total)) + 
+         geom_bar(stat = 'identity') + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+```
+
+Find the target plot that you want to work towards as an attachment on canvas `sleep_barplot.png`
+
+### 5a. Discuss visual choices [(5 points)]{style="color: red;"}
+
+Contrast the output of the initial barplot with the desired final plot and make 5 brief observations to answer - ***In what aspects is latter better than the former?***
+
+*Hints:* [barbarplots](https://thenode.biologists.com/barbarplots/photo/); [horizontal bars](https://www.storytellingwithdata.com/blog/2012/10/my-penchant-for-horizontal-bar-graphs); William Chases' glamour of graphics [talk](https://www.youtube.com/watch?v=h5cTacaWE6I),
+
+![](https://imgur.com/MT92oYy)
+
+![](../../outputs/sleep_barplot.png)
+
+### 5b. Improve the plot [(7 points)]{style="color: red;"}
+
+Now, try to improve the plot to tend towards the desired plot step by step. You can either do it in a single chunk or use multiple chunks with each step being added serially.
+
+*Don't worry about getting it perfectly alright, just try to get each element in as much as you can and show what you tried for the ones that didn't work.*
+
+Hints :
+
+1.  replace bar with boxplot, flip the coordinates so that labels are not tilted anymore [(1 point)]{style="color: red;"}
+2.  Overlay points on the boxplot with some transparency [(1 point)]{style="color: red;"}
+    1.  Add some noise to the points using `position_jitter()`, [(2 points)]{style="color: red;"}
+3.  Add proper axis labels [(1 point)]{style="color: red;"}
+4.  Add text using `geom_text()` based on the number of counts [(1 point)]{style="color: red;"}
+5.  modifying title position in `theme()` [(1 point)]{style="color: red;"}
+
+```{r improved-plot}
+# improved plot
+
+```
+
+### 5c.bonus. Rearrange data order [(+1 point)]{style="color: red;"}
+
+Re-arrange the data in a nice order to make the plot more pleasing. *You will have to use* `arrange()` and `fct_inorder()` functions
+
+### 5d.bonus. format title text [(+1 point)]{style="color: red;"}
+
+Make the words in the title text referring to the x and y axis to be distinguished (bold/italics/other colours). Can use a markdown formatter as in [ggtext](https://wilkelab.org/ggtext/articles/theme_elements.html)
+
+## 6. Vectorized function [(6 points)]{style="color: red;"}
+
+-   Write a function that takes two or more numbers and adds them, called `plus`. [(*1 point*)]{style="color: red;"}
+
+    ```{r}
+    # 
+    ```
+
+-   Modify this function now such that it can also take `characters` (instead of numbers), and combines them using the `cat()` function. [(*2 points*)]{style="color: red;"}
+
+    ```{r}
+    #
+    ```
+
+-   Now either modify this function or encompass this within another function (call it `vector_plus`) to work when the arguments provided are vectors (*of the same length*) rather than single objects. **This function should output a vector of the same size as each of the input arguments**. [(*3 points*)]{style="color: red;"}
+
+### 6.b.bonus. Make an informative error [(+*2 points*)]{style="color: red;"}
+
+Use the necessary function that stops the code and returns an informative [error message](https://stackoverflow.com/a/12723837/9049673) when the vectors are not of the same length (*since you can't do one-to-one computation with them*).
+
+```{r}
+# 
+```
+
+Note: For all the prompts above, **call your function** and **show us the result for each clause** provided
+
+## 7. Vectorize anything [(3 points)]{style="color: red;"}
+
+Use a `for` loop to print the **column name** and the **data type** of each column in the `sleeping_data` tibble from above [(*3 points*)]{style="color: red;"}
+
+### 7a.bonus. Using vectorization [(+3 points)]{style="color: red;"}
+
+Do the same now using vectorization instead of a loop - using the `map()` function (or any other such function). [(+*1 point*)]{style="color: red;"}
+
+You would have noticed that the output of the `map()` command is a list. It prints each entry of the list one below the other and is not space efficient to concisely display the column name and type of all 11 variables without needing to scroll. Find a better way to display this by returning any other data type or convert the list into a named vector. *Make sure that both the column name and the type are visible!* [(+*1.5 points*)]{style="color: red;"}
+
+-   *Document your sources including which package this function is from and how you learned to use it* *in short* [(+*0.5 point*)]{style="color: red;"}
+
+## 8. Plot multiple columns [(*5 points*)]{style="color: red;"}
+
+-   Use the dataset `df` below, plot y1, y2 and y3 in 3 different colours [(*2 points*)]{style="color: red;"}
+
+```{r}
+df <- tibble(x = 1:10, y1 = x, y2 = x^2, y3 = x^3)
+
+# plotting here
+```
+
+-   Use `pivot_wider()` to reshape the data and make a similar `ggplot` with different colours [(2+*1 points*)]{style="color: red;"} (learn how to use the `pivot_wider()` function from documentation and cite your sources)
+
+### 8.b.bonus. Why is `pivot_wider()` better here?
+
+(bonus) Discuss how this `pivot_wider` approach would be helpful compared to the previous approach [(*1 point*)]{style="color: red;"}
+
+::: {.class style="color: firebrick;"}
+Answer here!
+:::
+
+# Attributions
+
+For the questions, I would like to acknowledge these sources of inspiration
+
+-   Annie for many questions
+
+-   Sam for quality control and Q4 idea
+
+-   R errors from [statsandr.com](https://statsandr.com/blog/top-10-errors-in-r/#unmatched-parentheses-curly-braces-square-brackets-or-quotes)
+
+-   Nice list of [css colours](https://duckduckgo.com/?t=ffab&q=css+colours&ia=answer&iax=answer) to format a `.class` of text in a particular colour to distinguish it from questions (*if you are curious, you can change the colour of all your answers from firebrick to something else by doing* `find-and-replace` in the `Source` mode! **+1 bonus point** for this)
+
+For the solutions
+
+::: {.class style="color: firebrick"}
+Your attributions here!
+:::
+
+::: {style="color: teal"}
+Space for TA/grader comments here!
+
+(copy this in the middle of the code for more elaborate comments)
+:::
