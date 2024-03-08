@@ -132,20 +132,48 @@ Grab 3-5 lines of R code from any HW or write some R code to demonstrate how you
 
 Make an R chunk for demonstrating this below
 
+```{r code_from_hw}
+
+city_temp <- c(20, 20, 22, 17, 18)
+
+# The comments in this r-chunk explain what each line; this for loop assigns a logical value for each numerical value given a condition.
+for (i in city_temp){ # For a pre-defined numeric vector "city_temp" initialize a for loop that iterates across the vector elements
+  if (i > mean(city_temp)) { # If the element in question is greater than the mean value of the vector
+    print('TRUE')            # the function will print "TRUE".
+  } else print('FALSE')      # Otherwise, the function will print "FALSE"
+}
+```
+
 ::: {.class style="color: firebrick;"}
-gap_gdp \<- gap_temp %\>% mutate(gdp = gdpPercap\*pop) %\>% \# Mutate temporary vector to display total gdp filter(year ==2007) gap_gdp
+In the above demonstration, the documentation is used to explain what the code's purpose is and how the arguments within in the function operate.
 :::
 
 ### 1b.3. Documenting R functions
 
 Now do the same with another R chunk below for demonstrating how to add documentation to an R function (from HW/write any function *that does more than calling a single in-built function*). Your documentation should use [roxygen2](https://roxygen2.r-lib.org/articles/rd.html#basics) style comments.
 
+```{r documentation_R_function}
+
+```
+
+::: {.class style="color: firebrick;"}
+Reference: <https://r-pkgs.org/man.html>
+:::
+
 ### 1c. Troubleshooting
 
 Name and cite two ways to interrogate your R code or function to understand what it is doing and also to troubleshoot errors.
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+One way to interrogate a function is to use the **Question Mark operator** (?). By typing ?*function_name* you can access the R documentation which defines the purpose of the function, the arguments, and also provides interactive examples.
+
+A way to troubleshoot errors in code chunks is to keep an eye out for the red X that shows up on the left hand side of the R code chunk; if you hover this red X with your cursor, it will provide information about missing punctuation or unrecognized arguments.
+
+References:
+
+<https://blog.enterprisedna.co/rstudio-help-ways-to-troubleshoot-r-problems/>
+
+<https://bookdown.org/yih_huynh/Guide-to-R-Book/trouble.html>
 :::
 
 ### 1c.2. Troubleshooting practicals
