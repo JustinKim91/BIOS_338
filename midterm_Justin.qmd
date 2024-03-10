@@ -549,7 +549,7 @@ Contrast the output of the initial barplot with the desired final plot and make 
 
 ::: {.class style="color: firebrick;"}
 1.  The final plot swaps the x and y axis variables, placing the order on the y-axis and the sleep_total on the x-axis
-2.  The final plot uses a box plot as opposed to a histogram
+2.  The final plot uses a box plot as opposed to a bar graph
 3.  The final plot also adds a label to the sleep_total axis as "Sleep duration per day (hours)" to provide clarity for what the sleep measurement represents
 4.  The final plot also provides a count for how many entries appear for each order
 5.  The final product does not use the total sleep across the order, but rather it uses the individual values which makes the data more digestible. For instance, for the *Rodentia* order, seeing the order having over 200 hours of total sleep is not a meaningful piece of information.
@@ -572,9 +572,22 @@ Hints :
 
 ```{r improved-plot}
 # improved plot
-ggplot(sleeping_data, aes(order, sleep_total)) + 
-         geom_bar(stat = 'identity') + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+sleep_order <- sleeping_data %>% group_by(order) %>% mutate(count = n()) # Create new dataset that counts the number of individuals in each order
+
+sleep_order_plot <- ggplot(sleep_order, aes(x = sleep_total, y = order)) + # Swapped axis so labels are no longer tilted
+  geom_boxplot()+ # Replacing the bar graph with box and whisker 
+  geom_point(position = "jitter", alpha = 0.5) + # Overlaying points on the boxplot with "small random variation" in location; also decreasing the opacity of the points.
+  labs(x = "Sleep duration per day (hours)", y = "", title = "Mammals sleep duration changes across orders with a wide variation", subtitle = "Number of members in each order specified next to the y-axis") + # Labeling
+  theme(plot.title = element_text(hjust = -2), plot.subtitle = element_text(hjust = -0.5), axis.line = element_line(colour = "black")) + # Moving title/subtitle to centralize them for better readibility
+  geom_text(data = sleep_order %>% distinct(order, .keep_all = TRUE), # Adding count for the number of individuals in each order
+            aes(y = order, x = 0, label = count),
+            hjust = 1,
+            size = 4,
+            angle = 0)
+  sleep_order_plot
+  
+  # References: https://ggplot2.tidyverse.org/reference/geom_jitter.html
+  # ...         https://ggplot2.tidyverse.org/reference/aes_colour_fill_alpha.html
 ```
 
 ### 5c.bonus. Rearrange data order [(+1 point)]{style="color: red;"}
@@ -584,6 +597,22 @@ Re-arrange the data in a nice order to make the plot more pleasing. *You will ha
 ### 5d.bonus. format title text [(+1 point)]{style="color: red;"}
 
 Make the words in the title text referring to the x and y axis to be distinguished (bold/italics/other colours). Can use a markdown formatter as in [ggtext](https://wilkelab.org/ggtext/articles/theme_elements.html)
+
+```{r improved-plot-title-formatting}
+new_title <- expression(paste("Mammals", bolditalic(" sleep duration"), " changes across", bolditalic(" order"), " with a wide variation")) # Write formatting for new title so I can simply plug it in as an argument for my labs()
+
+
+ggplot(sleep_order, aes(x = sleep_total, y = order)) + # Swapped axis so labels are no longer tilted
+  geom_boxplot()+ # Replacing the bar graph with box and whisker 
+  geom_point(position = "jitter", alpha = 0.5) + # Overlaying points on the boxplot with "small random variation" in location; also decreasing the opacity of the points.
+  labs(x = "Sleep duration per day (hours)", y = "", title = new_title, subtitle = "Number of members in each order specified next to the y-axis") + # Labeling
+  theme(plot.title = element_text(hjust = -2), plot.subtitle = element_text(hjust = -0.5), axis.line = element_line(colour = "black")) + # Moving title/subtitle to centralize them for better readibility
+  geom_text(data = sleep_order %>% distinct(order, .keep_all = TRUE), # Adding count for the number of individuals in each order
+            aes(y = order, x = 0, label = count),
+            hjust = 1,
+            size = 4,
+            angle = 0)
+```
 
 ## 6. Vectorized function [(6 points)]{style="color: red;"}
 
