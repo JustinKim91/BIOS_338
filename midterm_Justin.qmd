@@ -468,10 +468,16 @@ rnorm(n = 3, var = 1)
 ```
 
 ::: {.class style="color: firebrick;"}
-The second argument of the rnorm function should be sd and not var. The rnorm function does not recognize the argument var.
+The rnorm code above is meant to generate three random numbers by a normal distribution with a variance of 1. The second argument of the rnorm function should be sd and not var. The rnorm function does not recognize the argument var.
 
-Reference: <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/Normal>
+Reference: <https://www.rdocumentation.org/packages/compositions/versions/2.0-8/topics/rnorm>
 :::
+
+```{r troubleshoot-2_fixed}
+#| eval: false
+
+rnorm(n = 3, sd = 1)
+```
 
 ```{r troubleshoot-3}
 #| eval: false
@@ -479,6 +485,17 @@ Reference: <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/
 gender <- factor(c("female", "female", "male", "female", "male"))
 
 Mean(gender)
+```
+
+::: {.class style="color: firebrick;"}
+The mean function above attempts to take the average of the gender vector. However, the error occurs due to the fact that the mean function cannot compute the mean of a character vector. In order to run the mean function on the above gender vector, you would have to redefine the vector as.numeric() to run the mean.
+:::
+
+```{r troubleshoot-3_fixed}
+gender <- factor(c("female", "female", "male", "female", "male"))
+gender_num <- as.numeric(gender) %>% mean() # Make new numeric vector to represent the original chracter vector and take mean
+
+gender_num
 ```
 
 *There are also certain scenarios where the code gives no error but it just doesn't do what you would expect it to do, the example below is in this category. You need to understand the intent of this code, explain why it doesn't do the intended thing and fix it..*
@@ -493,8 +510,17 @@ ggplot(a, aes(a1, a2, colour = 'blue')) +
 ```
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+In the above code, the purpose of the colour argument in the aes() is to make the plot blue. However, by placing the color argument within the aes() of the ggplot, it simply adds a legend entry "colour" and labels the plot as "blue". To fix this issue, the colour argument should be specified in the geom_point() and/or geom_line() functions.
 :::
+
+```{r troubleshoot-4_fixed}
+a <- tibble(a1 = -5:10, a2 = exp(a1)) # Open tidyverse library first --> library(tidyverse)
+
+ggplot(a, aes(a1, a2)) + 
+  geom_point(colour = 'blue') + geom_line(colour = 'blue')
+
+
+```
 
 ## 5. Make a better ggplot [(12 points)]{style="color: red;"}
 
@@ -521,6 +547,14 @@ Contrast the output of the initial barplot with the desired final plot and make 
 
 ![](../../outputs/sleep_barplot.png)
 
+::: {.class style="color: firebrick;"}
+1.  The final plot swaps the x and y axis variables, placing the order on the y-axis and the sleep_total on the x-axis
+2.  The final plot uses a box plot as opposed to a histogram
+3.  The final plot also adds a label to the sleep_total axis as "Sleep duration per day (hours)" to provide clarity for what the sleep measurement represents
+4.  The final plot also provides a count for how many entries appear for each order
+5.  The final product does not use the total sleep across the order, but rather it uses the individual values which makes the data more digestible. For instance, for the *Rodentia* order, seeing the order having over 200 hours of total sleep is not a meaningful piece of information.
+:::
+
 ### 5b. Improve the plot [(7 points)]{style="color: red;"}
 
 Now, try to improve the plot to tend towards the desired plot step by step. You can either do it in a single chunk or use multiple chunks with each step being added serially.
@@ -538,7 +572,9 @@ Hints :
 
 ```{r improved-plot}
 # improved plot
-
+ggplot(sleeping_data, aes(order, sleep_total)) + 
+         geom_bar(stat = 'identity') + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ### 5c.bonus. Rearrange data order [(+1 point)]{style="color: red;"}
