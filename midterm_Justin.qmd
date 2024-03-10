@@ -285,16 +285,20 @@ Let's create a dataset. First, create a tibble from the vectors below. The named
 first_names <- c("Albert", "Jane", "Linus", "Carl", "George", "Jennifer")
 last_names <- c("Einstein", "Goodal", "Pauling", "Marx", "Church", "Doudna")
 
+# library(tidyverse)
+# Create a dataset by assigning a name to the tibble
+famous_people <- tibble(x = first_names, y = last_names) # define the first column, x, in tibble as the first name vector and the second column, y, as the last names vector
 ```
 
 ### 2b. Adding a column [(2 *points*)]{style="color: red;"}
 
 Now, using a `mutate()` call, randomly (from a *uniform distribution*) assign an age **as an integer** between 30-85 for each person, as another column to your data called **age**. **Do not touch the `set.seed` function, that is for grading!**
 
-```{r}
+```{r mutated-tibble}
 set.seed(2292025) #Do not edit!
 
-
+famous_people_age <- famous_people %>% mutate(Age = sample(30:85,6)) # Mutating the famous_people dataset to include a new column of age. The sample() will generate 6 random integer between 30 and 85
+famous_people_age
 ```
 
 ### 2c. if..else/conditional computations on a column [(4 points)]{style="color: red;"}
@@ -317,7 +321,16 @@ The most efficient way is to use a vectorized [`case_when()`](https://dplyr.tidy
 
 ```{r case-when}
 # case_when()
+# I mutates the tibble once again to include the new favorite scientist column and used the case_when() function to
+# ... set up the conditions of which scientist was the person's favorite based on their age range. However, in the 
+# ... previous generation of ages, all of my ages for the people came out above the upper age range of 49, and the
+# ... entire list ended up having the same favorite scientist.
 
+famous_people_favorite <- famous_people_age %>% mutate(fav_scientist = case_when(Age >= 30 & Age <= 39 ~ "Francis Arnold",
+                                                                                 Age >= 40 & Age <= 49 ~ "Louis Pasteur",
+                                                                                 Age > 49 ~ "Isaac Newton"))
+
+famous_people_favorite
 ```
 
 #### Aproach 2: using `for()` and `if()..else` workflow
@@ -336,9 +349,14 @@ We will be working with data about sleeping mammals. Write 1-2 sentences describ
 
 <https://rdrr.io/cran/ggplot2/man/msleep.html>
 
-```{r}
+```{r sleep}
 sleeping_data <- msleep # reassign a more intuitive name
 sleeping_data 
+
+# The dataset contains information regarding the sleep patterns of animals and other related data. For instance, the some
+# ... of the columns give information about the animals such as common name, genus, order, diet, and conservation status, while the remaining columns give information regarding, total hours of sleep, hours of REM sleep, length of sleep cycle, and brain/body weight.
+
+# Reference: https://rdrr.io/cran/ggplot2/man/msleep.html
 ```
 
 ### 3b.1. Make a scatter plot [(2 *points*)]{style="color: red;"}
@@ -355,28 +373,48 @@ Make the size of the dots the size of "brainwt". Add a best fit regression line.
 
 ##### (note: some data points will be removed. that is ok)
 
-```{r}
+```{r sleep-scatter}
 
+sleep_plot <- ggplot(sleeping_data, aes(x = log(bodywt), y = sleep_total, color = vore, size = brainwt)) + # Create a plot using ggplot(), using the sleeping_data dataset. Set the x variable to be the log of bodywt and the y variable as the total sleep measure. Color code the data based on the diet and size the data points based on brain weight.
+  geom_point() + # Add the data points to the ggplot
+  geom_smooth(se = FALSE, color = "black") + # Line of best fit; specify color to prevent geom_smooth from generating regression line for each diet
+  labs(y = "Total Sleep", x = "Log of Body Weight", color = "Diet") # Adding labels
+
+sleep_plot
 ```
 
 ### 3b.2. Add facet based on "vore" [(2 points)]{style="color: red;"}
 
 Make the same plot, but facet based on the `vore` column (`facet_..` splits the plot into subsets for each unique value in `vore` and puts them in side-by-side plots)
 
-```{r}
-
+```{r facet}
+sleep_facet <- ggplot(sleeping_data, aes(x = log(bodywt), y = sleep_total, color = vore, size = brainwt)) +
+  geom_point() +
+  geom_smooth(se = FALSE, color = "black") +
+  labs(y = "Total Sleep", x = "Log of Body Weight", color = "Diet")+
+  facet_wrap(vars(vore)) # Separate the individual regression lines from each diet
+sleep_facet
 ```
 
 ### 3b.3. Show patterns [(2 points)]{style="color: red;"}
 
 To emphasize patterns in the data, fit a `linear regression` line using the `geom_smooth()` function. *Note that you need to add a parameter in the* `method =` *argument to make it linear rather than a curved line.*
 
+```{r linear-regression}
+sleep_plot <- ggplot(sleeping_data, aes(x = log(bodywt), y = sleep_total, color = vore, size = brainwt)) +
+  geom_point() +
+  geom_smooth(se = FALSE, color = "black") +
+  labs(y = "Total Sleep", x = "Log of Body Weight", color = "Diet")
+
+sleep_plot # Same as in 3b.1. since it also asked for a regression line
+```
+
 ### 3b.3. Discuss patterns [(2 points)]{style="color: red;"}
 
 Do any patterns emerge, how strong is the relationship? If you think there is a relationship, using logic, why do you think this occurs? If you don't think there is a relationship, why do you think there is no relationship?
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+There is a very weak pattern suggested based on the faceted plots. In general, it seems that, as body weight increases, the total hours of sleep decreases. However, I do not believe that this is a legitimate relationship, given that in some cases (ie. Insectivores), such relationship does not even exist. Furthermore, the body weight was logged for the above plots, further obscuring the relationship between weight and total sleep.
 :::
 
 ## 4. Troubleshooting [(8 *points,*]{style="color: red;"} 2 per question[)]{style="color: red;"}
