@@ -90,15 +90,16 @@ Follow these best practices when writing your code and text for the document for
     -   indent your code to make the most sense for things on the same line, for example
 
 ```{r explain-indent-choices}
-ggplot(df, aes(a1, a2)) + # keeping it short when few options
-  geom_point()
-
-ggplot(df, 
-       aes(a1, a2, # expanding into newer lines when there's more options
-           colour = a3, shape = a4, # similar things grouped together
-           frame = a5)) + 
-  geom_point() + 
-  geom_line()
+# # library(tidyverse)
+# ggplot(df, aes(a1, a2)) + # keeping it short when few options
+#   geom_point()
+# 
+# ggplot(df, 
+#        aes(a1, a2, # expanding into newer lines when there's more options
+#            colour = a3, shape = a4, # similar things grouped together
+#            frame = a5)) + 
+#   geom_point() + 
+#   geom_line()
 
 ```
 
@@ -233,6 +234,7 @@ getwd() # This function shows the pathway on your local drive to your current di
 Demonstrate the loading of a `csv` file by writing a path relative to (starting from) R's current working directory in an R chunk below. Discuss the convenience of this compared to an [absolute path](https://networkencyclopedia.com/absolute-path/)
 
 ```{r relative_path}
+#| eval: false
 # library(tidyverse) to load tidyverse as I intend to read the csv using read_csv() for a tibble
 
 read_csv("../../Data/histdata.csv") # Since I found the working directory in 1d., I located a csv file in folder a few steps prior to the # ...current directory. To read this file I used the ../ notation to denote one directory up; I used this twice, to move two folders back
@@ -270,6 +272,7 @@ A package is a collection of objects, functions, data, and code. Packages are co
 BONUS: How can you install a package that is not on CRAN? (for example, on github) ; *there's a direct function or a more manual approach, show either of these approaches for the* `ggbeeswarm` *package*
 
 ```{r install-from-github}
+#| eval: false
 # install and load devtools package to access the install_github() function
 # install.packages("devtools")
 # library(devtools) 
@@ -703,7 +706,7 @@ ggplot(sleep_order, aes(x = sleep_total, y = order)) + # Swapped axis so labels 
 -   Now either modify this function or encompass this within another function (call it `vector_plus`) to work when the arguments provided are vectors (*of the same length*) rather than single objects. **This function should output a vector of the same size as each of the input arguments**. [(*3 points*)]{style="color: red;"}
 
 ```{r vector-plus}
-
+#| eval: false
 vector_plus <- function(...) {
   a <- list(...)
   vec_out <- c()
@@ -728,7 +731,8 @@ vector_plus(c(1,4,5), c(4,5,8), c("x", "y", "z")) # "14x" "45y" "58z"
 Use the necessary function that stops the code and returns an informative [error message](https://stackoverflow.com/a/12723837/9049673) when the vectors are not of the same length (*since you can't do one-to-one computation with them*).
 
 ```{r informative-error}
-# 
+#| eval: false
+
 vector_plus <- function(...) {
   a <- list(...)
   if (!all(sapply(a, length) == length(a[[1]]))) {# sapply takes the length of all elements in a to compare the length of the input vectors.
