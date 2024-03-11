@@ -154,10 +154,34 @@ Now do the same with another R chunk below for demonstrating how to add document
 
 ```{r documentation_R_function}
 
+#' get_mean Function
+#' 
+#' @description 
+#' `get_mean` returns the artimetic mean of its vector argument
+#' 
+#' @details 
+#' This function takes the sum of all elements within the argument vector and find the length of the vector. It then
+#' divides the sum of the elements by the length of the vector.
+#' 
+#' @param `x` is a numeric vector
+#' 
+#' @return A function that takes a numeric vector as an argument and returns the arithmetic mean of the vector
+#' 
+#' @example 
+#' get_mean(1:5)
+#'
+#' v <- c(1, 5, 7, 4)
+#' get_mean(v)
+get_mean <- function(x){
+  s <- sum(x)
+  l <- length(x)
+  avg <- s / l
+  return(avg)
+}
 ```
 
 ::: {.class style="color: firebrick;"}
-Reference: <https://r-pkgs.org/man.html>
+Reference: Class5_demo_loops-functions.R
 :::
 
 ### 1c. Troubleshooting
@@ -263,12 +287,20 @@ Reference: <https://support.datacamp.com/hc/en-us/articles/360006286174-Installi
 Explain why does assignment hide the result of the calculation in R, find a citation for this statement. Demonstrate two contexts where you observe this behavior
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+The hiding of calculation results in R is a practice of object-orientated programming. The benefit object-oriented programming, specifically assignments in our case, is that it allows successive writing and maintenance of the code to be much easier and cleaner. For instance, if we are working with a variable with an assignment of a arithmetic operation, it is easier to work with that variable than it is to with the calculated value, especially if the arguments for the arithmetic operation themselves were variables.
 :::
 
 ```{r assignment}
-# 
+# Example
 
+x <- 2 # Assign values to x and y
+y <- 3
+z <- x + y # Assign the operation of x + y to Z; this way, if the values of x and y change, we can just as easily work
+# ...        work with z as before the variables were changed.
+
+z # 5
+
+# Reference: https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Object_002doriented-programming
 ```
 
 ## 2. Creating datasets. [(7 point)]{style="color: red;"}
@@ -594,6 +626,26 @@ sleep_order_plot <- ggplot(sleep_order, aes(x = sleep_total, y = order)) + # Swa
 
 Re-arrange the data in a nice order to make the plot more pleasing. *You will have to use* `arrange()` and `fct_inorder()` functions
 
+```{r improved-plot-reordered}
+# Recreating dataset so that the order is displayed in descending order of count
+sleep_arranged <- arrange(sleep_order, desc(count))
+
+# Mostly the same coding for original improved plot, but specify to graph box plots in order that they apear in dataset (arranged by
+#... count)
+ggplot(sleep_arranged, aes(x = sleep_total, y = fct_inorder(order))) + # Swapped axis so labels are no longer tilted
+  geom_boxplot()+ # Replacing the bar graph with box and whisker 
+  geom_point(position = "jitter", alpha = 0.5) + # Overlaying points on the boxplot with "small random variation" in location; also decreasing the opacity of the points.
+  labs(x = "Sleep duration per day (hours)", y = "", title = "Mammals sleep duration changes across orders with a wide variation", subtitle = "Number of members in each order specified next to the y-axis") + # Labeling
+  theme(plot.title = element_text(hjust = -2), plot.subtitle = element_text(hjust = -0.5), axis.line = element_line(colour = "black")) + # Moving title/subtitle to centralize them for better readibility
+  geom_text(data = sleep_order %>% distinct(order, .keep_all = TRUE), # Adding count for the number of individuals in each order
+            aes(y = order, x = 0, label = count),
+            hjust = 1,
+            size = 4,
+            angle = 0)
+
+# Reference: https://stackoverflow.com/questions/4260698/r-ordering-in-boxplot
+```
+
 ### 5d.bonus. format title text [(+1 point)]{style="color: red;"}
 
 Make the words in the title text referring to the x and y axis to be distinguished (bold/italics/other colours). Can use a markdown formatter as in [ggtext](https://wilkelab.org/ggtext/articles/theme_elements.html)
@@ -612,30 +664,90 @@ ggplot(sleep_order, aes(x = sleep_total, y = order)) + # Swapped axis so labels 
             hjust = 1,
             size = 4,
             angle = 0)
+
+# Reference: https://stackoverflow.com/questions/67504377/how-to-use-bold-italic-and-underline-in-ggplot2
 ```
 
 ## 6. Vectorized function [(6 points)]{style="color: red;"}
 
 -   Write a function that takes two or more numbers and adds them, called `plus`. [(*1 point*)]{style="color: red;"}
 
-    ```{r}
-    # 
+    ```{r plus}
+    # Naming a custom function "plus" that will take two inputs and add those two numeric values together.
+    plus <- function(a,b,...){a+b+...}
+
+    plus(3,4,5)
     ```
 
 -   Modify this function now such that it can also take `characters` (instead of numbers), and combines them using the `cat()` function. [(*2 points*)]{style="color: red;"}
 
-    ```{r}
+    ```{r plus-modified}
     #
+    plus_mod <- function(...){ # Modifying function so that if all of the arguments are numerical values,
+      x <- c(...)
+      if (class(x)=="numeric"){
+        print(sum(x)) # the function will print the sum of the arguments
+      } else { # Otherwise, the function will combine the arguments into a character string
+        return(capture.output(cat(x, sep = "")))
+      }
+    }
+
+    plus_mod(1,2,3)
+    plus_mod(1,2,"f")
+
+
+    # References: https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/cat
+    # ...         https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/capture.output
     ```
 
 -   Now either modify this function or encompass this within another function (call it `vector_plus`) to work when the arguments provided are vectors (*of the same length*) rather than single objects. **This function should output a vector of the same size as each of the input arguments**. [(*3 points*)]{style="color: red;"}
+
+```{r vector-plus}
+
+vector_plus <- function(...) {
+  a <- list(...)
+  vec_out <- c()
+  for (i in 1:length(a[[1]])) {
+    v <- c()
+    for (j in 1:length(a)) {
+      v <- append(v, a[[j]][i])
+    }
+    vec_out <- append(vec_out, plus(v))
+  }
+  return(vec_out)
+}
+
+vector_plus(1:3, c("a", "b", "c")) # "1a" "2b" "3c"
+vector_plus(1:3, 4:6) # "14" "25" "36"
+vector_plus(c(1,4,5), c(4,5,8), c(5,9,3)) # 10 18 16
+vector_plus(c(1,4,5), c(4,5,8), c("x", "y", "z")) # "14x" "45y" "58z"
+```
 
 ### 6.b.bonus. Make an informative error [(+*2 points*)]{style="color: red;"}
 
 Use the necessary function that stops the code and returns an informative [error message](https://stackoverflow.com/a/12723837/9049673) when the vectors are not of the same length (*since you can't do one-to-one computation with them*).
 
-```{r}
+```{r informative-error}
 # 
+vector_plus <- function(...) {
+  a <- list(...)
+  if (!all(sapply(a, length) == length(a[[1]]))) {# sapply takes the length of all elements in a to compare the length of the input vectors.
+  stop("Vector lengths do not match")
+  }
+  vec_out <- c()
+  for (i in 1:length(a[[1]])) {
+    v <- c()
+    for (j in 1:length(a)) {
+      v <- append(v, a[[j]][i])
+    }
+    vec_out <- append(vec_out, plus(v))
+  }
+  return(vec_out)
+}
+
+vector_plus(1:2, 1:3) # Displayed message: "Error in vector_plus(1:2, 1:3) : Vector lengths do not match"
+
+# Reference: https://www.guru99.com/r-apply-sapply-tapply.html
 ```
 
 Note: For all the prompts above, **call your function** and **show us the result for each clause** provided
@@ -643,6 +755,14 @@ Note: For all the prompts above, **call your function** and **show us the result
 ## 7. Vectorize anything [(3 points)]{style="color: red;"}
 
 Use a `for` loop to print the **column name** and the **data type** of each column in the `sleeping_data` tibble from above [(*3 points*)]{style="color: red;"}
+
+```{r vectorize_anything}
+for (i in colnames(sleeping_data)) { # Iterate the for loop across the columns of sleeping_data
+  data_type <- class(sleeping_data[[i]]) # Find the class type of each column
+  print(paste(i, "-", data_type)) # data_type is a numeric, so use paste to convert to a character string; add hyphen 
+}                                 # ... to display data type next to the name of the column
+
+```
 
 ### 7a.bonus. Using vectorization [(+3 points)]{style="color: red;"}
 
@@ -652,24 +772,50 @@ You would have noticed that the output of the `map()` command is a list. It prin
 
 -   *Document your sources including which package this function is from and how you learned to use it* *in short* [(+*0.5 point*)]{style="color: red;"}
 
+```{r Using-vectorization}
+sleep_col_data <- map(sleeping_data, class) # Returns list of the data type for each colum in sleeping_data
+sleep_col_data
+
+sleep_col_data_vec <- map_vec(sleeping_data, class) # Returns classes as a character vector
+sleep_col_data_vec
+
+# Reference: https://purrr.tidyverse.org/reference/map.html
+# These functions are part of the purrr package in Tidyverse
+```
+
 ## 8. Plot multiple columns [(*5 points*)]{style="color: red;"}
 
 -   Use the dataset `df` below, plot y1, y2 and y3 in 3 different colours [(*2 points*)]{style="color: red;"}
 
-```{r}
-df <- tibble(x = 1:10, y1 = x, y2 = x^2, y3 = x^3)
-
+```{r plotting-multiple-columns}
 # plotting here
+df <- tibble(x = 1:10, y1 = x, y2 = x^2, y3 = x^3)
+ggplot(df, aes(x = x))+
+  geom_smooth(aes(y = y1), colour = "dodgerblue") +
+  geom_smooth(aes(y = y2), colour = "deeppink") + 
+  geom_smooth(aes(y = y3), colour = "seagreen")
 ```
 
--   Use `pivot_wider()` to reshape the data and make a similar `ggplot` with different colours [(2+*1 points*)]{style="color: red;"} (learn how to use the `pivot_wider()` function from documentation and cite your sources)
+-   Use `pivot_longer()` to reshape the data and make a similar `ggplot` with different colours [(2+*1 points*)]{style="color: red;"} (learn how to use the `pivot_wider()` function from documentation and cite your sources)
 
-### 8.b.bonus. Why is `pivot_wider()` better here?
+```{r pivot-longer}
+df_pivot <- pivot_longer(df, cols = c(y1, y2, y3), names_to = "Powers", values_to = "Value")
 
-(bonus) Discuss how this `pivot_wider` approach would be helpful compared to the previous approach [(*1 point*)]{style="color: red;"}
+ggplot(df_pivot, aes(x = x, y = Value, color = Powers)) +
+  geom_smooth()
+
+
+# Reference: https://tidyr.tidyverse.org/reference/pivot_longer.html
+```
+
+### 8.b.bonus. Why is `pivot_longer()` better here?
+
+(bonus) Discuss how this `pivot_longer` approach would be helpful compared to the previous approach [(*1 point*)]{style="color: red;"}
 
 ::: {.class style="color: firebrick;"}
-Answer here!
+For the pivot_longer, we do not have to code each plot individually using geom_smooth. Rather, pivot_longer condenses the columns by moving all y1, y2, and y3 values into the same column titled "Powers". Then, the pivot_longer function differentiates the entries under the "Powers" column and plots these values as three different plots on the same graph.
+
+Reference: <https://tidyr.tidyverse.org/reference/pivot_longer.html>
 :::
 
 # Attributions
@@ -687,7 +833,7 @@ For the questions, I would like to acknowledge these sources of inspiration
 For the solutions
 
 ::: {.class style="color: firebrick"}
-Your attributions here!
+I would like to acknowledge various sources such as StackOverflow forums, RDocumentation, ggplot Documentation, and all of the linked resources provided within the assignment, Furthermore, I would like to acknowledge my groupmates Seungheon Lee and Gary Shi for our collaboration throughout the assignment.
 :::
 
 ::: {style="color: teal"}
