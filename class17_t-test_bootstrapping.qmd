@@ -50,7 +50,11 @@ iris2 <- select(iris, Sepal.Length, Species) %>% # Creating a new dataset that i
 Use the R function `t.test()` to do a t-test. Explore the parameters within this function and see how the P-values change when you change them. Important one is the `alternative` ; try going between `two-sided`, `less` and `greater` and understand the results
 
 ```{r two-sided-t}
-t.test(Sepal.Length )
+t.test(Sepal.Length ~ Species, data = iris2)
+```
+
+```{r one-sided-t}
+t.test(Sepal.Length ~ Species, data = iris2, alternative = 'less')
 ```
 
 ### Try doing ANOVA on all 3 species!
