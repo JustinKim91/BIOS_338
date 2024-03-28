@@ -38,15 +38,19 @@ iris <- iris # get dataset into environment
 Apart from the identifiers (the `Species` column), we only need the `Sepal.Length` column to run the t-test on. And we need to `filter` out only 2 species: `virginica` and `versicolor`. We need only 2 species *since t-test can only compare 2 things ; for comparing more species, explore doing ANOVA below)*
 
 ```{r data-wrangle}
-# finished data wrangling
+
+iris2 <- select(iris, Sepal.Length, Species) %>% # Creating a new dataset that includes only the Sepal.Length and Species from iris
+  filter(Species == "virginica"|Species == "versicolor") %>% # Filtering the column entries for Species
+  group_by(Species) # Grouping data by species
+
 ```
 
 ## Do a t-test
 
 Use the R function `t.test()` to do a t-test. Explore the parameters within this function and see how the P-values change when you change them. Important one is the `alternative` ; try going between `two-sided`, `less` and `greater` and understand the results
 
-```{r}
-
+```{r two-sided-t}
+t.test(Sepal.Length )
 ```
 
 ### Try doing ANOVA on all 3 species!
@@ -70,11 +74,15 @@ Remember: Bootstrapping involves -
 ::: {.span style="color: firebrick"}
 Outline your algorithm here
 
--   It is very helpful to write out or draw a flow chart
-
--   You need to see what needs to be done in your own language
-
--   Before you explain it to the computer in the R language!
+1.  Grab the **two species** data separately from the data
+    1.  (optional) -\> into two columns. (pivot_wider( ))
+2.  For each species run these operations 3 below (by putting them in a function). Run it 10,000 times while recording result in a tibble using a map( ) family of commands
+3.  Bootstrapping
+    1.  Make bootstrapped data for each using sample(50, ..., replacement = TRUE) function
+    2.  Find the **mean** of each bootstrapped data
+4.  and the difference in the means (column for virginica - versicolor)
+5.  Make a histogram
+6.  find the p-value from the bootstrapped data tibble/vector
 :::
 
 ```{r bootstrapping}
