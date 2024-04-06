@@ -50,18 +50,70 @@ iris2 <- select(iris, Sepal.Length, Species) %>% # Creating a new dataset that i
 Use the R function `t.test()` to do a t-test. Explore the parameters within this function and see how the P-values change when you change them. Important one is the `alternative` ; try going between `two-sided`, `less` and `greater` and understand the results
 
 ```{r two-sided-t}
+# Running a t-test with the null hypothesis that the mean Sepal.Length for 
+# ...versicolor and virginica are equal
 t.test(Sepal.Length ~ Species, data = iris2)
 ```
 
+::: {.span style="color: firebrick"}
+In the above two-side t-test, the p-value is extremely small
+
+```         
+p-value = 1.866e-07
+```
+
+, and it is less than 0.05, meaning that we can reject the null hypothesis and accept the alternative hypothesis that ...
+
+```         
+true difference in means between group versicolor and group virginica is not equal to 0
+```
+
+Below, when I added the alternative argument and set it equal to 'less' it runs a one-tailed t-test that runs the alternative hypothesis that
+
+```         
+true difference in means between group versicolor and group virginica is less than 0
+```
+
+and returns
+
+```         
+p-value = 9.331e-08
+```
+
+which allows us to accept the alternative hypothesis as it is less than 0.05
+
+On the other hand, when we set the alternative argument equal to "greater," it runs the one-tailed t-test in the opposite direction, and returns a p-value of 1 which is greater than 0.05, and we cannot accept the alternative argument that the mean of versicolor is is greater than virginica.
+
+References: <https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test>
+
+<https://www.youtube.com/watch?v=fO2X-8FXY6k>
+:::
+
 ```{r one-sided-t}
+# Adding the alternative argument of 'less' or 'greater' specifies the
+# ... alternative hypothesis that the mean of versicolor is less than or greater,
+# ... respetively, than the mean of virginica. This creates a one-tailed test.
 t.test(Sepal.Length ~ Species, data = iris2, alternative = 'less')
 ```
+
+::: {.span style="color: firebrick"}
+The p-value of the two-tailed test is the probability that the difference in mean of sepal length for the two species being *anything but zero* can occur by chance. Whereas, for the one-tailed test, (for example when alternative = 'less'), the p-value only considers the possibility that the mean of versicolor being *less than* that of virginica is possible due to chance.
+:::
 
 ### Try doing ANOVA on all 3 species!
 
 This tells you that there are atleast 2 species within the 3 that differ from each other significantly. Note: ANOVA also assumes data is normally distributed, independence and other [such stuff](https://statsandr.com/blog/anova-in-r/#underlying-assumptions-of-anova).
 
 Use this for help - <https://statsandr.com/blog/anova-in-r/>
+
+```{r anova}
+# We can run a one-way ANOVA in order to see if there is at least one species that ... is different in mean sepal length. For this we will use the original dataset   ... iris as iris2 only contains two species
+oneway.test(Sepal.Length ~ Species, data = iris)
+
+# Given that the p-value returned was 2.2e-16, we can reject the null hypothesis   ... that the means of all species in the iris dataset are the same. There is at    ... least one species that has a significantly different mean from the others.
+
+# Reference: https://statsandr.com/blog/anova-in-r/#interpretations-of-anova-results
+```
 
 ## Do bootstrapping
 
@@ -79,30 +131,126 @@ Remember: Bootstrapping involves -
 Outline your algorithm here
 
 1.  Grab the **two species** data separately from the data
-    1.  (optional) -\> into two columns. (pivot_wider( ))
-2.  For each species run these operations 3 below (by putting them in a function). Run it 10,000 times while recording result in a tibble using a map( ) family of commands
+    1.  (optional) -\> into two columns. `(pivot_wider())`
+2.  For each species run these operations 3 below (by putting them in a function). Run it 10,000 times while recording result in a tibble using a `map()` family of commands
 3.  Bootstrapping
-    1.  Make bootstrapped data for each using sample(50, ..., replacement = TRUE) function
+    1.  Make bootstrapped data for each using `sample(50, ..., replacement = TRUE)` function
     2.  Find the **mean** of each bootstrapped data
-4.  and the difference in the means (column for virginica - versicolor)
+4.  and the difference in the means (`column for virginica` - `versicolor`)
 5.  Make a histogram
 6.  find the p-value from the bootstrapped data tibble/vector
 :::
 
-```{r bootstrapping}
-
+```{r pivot-wider}
+iris2_wide <- 
+  
+  # make a serial number column (without this pivot makes a single row!)
+  mutate(iris2, index = row_number()) %>% 
+  
+  # now do the pivoting; pivot_wider splits the species column into two
+  pivot_wider(names_from = Species, # Labels the two new columns with the species ... names
+              values_from = Sepal.Length) # Assigns the Sepal.length values to each... row based on original representation in iris2
 
 ```
 
+```{r bootstrapping}
+
+bootstrapped_mean <- function(.vector, .size = length(.vector))
+{ # .vector is a numeric vector argument; the sample size is set to the length of ...the input vector.
+  
+  .boots <- # .boots will sample a vector with replacement
+    sample(.vector, size = .size, 
+           replace = TRUE)
+    
+  # if you want the intermediate bootstrapped data, return `.boot`
+# return(.boots)
+  # otherwise will only return the summary measurement
+  .means_boot <- mean(.boots)
+  # Similar to the returning the bootstrapped intermediate data, can return mean of ... the bootstrapped data
+# return(.means_boot)
+}
+
+get_n_boots <- function(.df = iris2_wide,
+                        .column = 'versicolor',
+                        num_of_boots = 10000)
+{
+    # isolate the column from the dataset (as a vector, so need two : `[[`)
+    .vec <- .df[[.column]]
+    .len <- length(.vec)
+    
+    # map_dbl returns a vector of numbers
+    # better/faster than a for() loop: doesn't do many write operations
+    map_dbl(1:num_of_boots,
+            ~ bootstrapped_mean(.vec, .len))
+}
+
+# test the function with a small bootstrap size
+get_n_boots(num_of_boots = 8)
+# or get_n_boots(). This will run 10,000 iterations by default
+
+# References: https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/sample
+
+```
+
+::: {.span style="color: firebrick"}
+The first function `bootstrapped_mean()` takes a numeric vector as an input and samples it as many times as the length of itself, with replacement. Having sampled the input vector, with replacement, it then takes the mean of the bootstrapped data.
+
+The second function `get_n_boots()` is set to operate off of the `iris2_wide` data frame, but it can also be changed to another data frame. It contains two variable arguments in `.column` and `num_of_boots`. In this case, the `.column` input is set to the `'versicolor'` column, which is a numeric vector of the sepal length of every versicolor entry. The column argument for the defined data frame is then assigned to `.vec` which is an used as the numeric vector argument in the previously written function `bootstrapped_mean()`. Similar to the `.size` argument in `bootstrapped_mean()`, the `.len` argument is assigned the length of `.vec` and is used as the `.size` argument. The `num_of_boots` argument is essentially going to be the number of times you want to run the `get_n_boots()` function. Normally, in the `map()` function family, the first argument is `.x` and the second will be the name of a function (`bootstrapped_mean()` in this case). If you put "`.`" as the argument for the function, it would run the values of `.x` in the function, however, in our case, we have previously defined the inputs for `bootstrapped_mean()`.
+
+References: <https://www.youtube.com/watch?v=nXQDiCTLTgU>
+:::
+
+```{r difference-in-means}
+
+bootmeandiff <-
+  tibble(bootnum = 1:10000,
+         mean_versi = get_n_boots(),
+         mean_virgi = get_n_boots(.column = 'virginica'),
+         diff_means = mean_virgi - mean_versi)
+bootmeandiff
+```
+
+::: {.span style="color: firebrick"}
+To find the differences in the mean values of the two species across the 10,000 iterations, we can create a tibble that is 10,000 rows long and define two columns as the `get_n_boots()` values for when the `.column` argument is set to `'versicolor'` and `'virginica'`, respectively. Then, make a fourth column that takes the values of the two `get_n_boots()` columns and subtracts the values.
+:::
+
 ## Plot histogram
 
-Show the histogram of the means of the bootstrapping excercise
+Show the histogram of the means of the bootstrapping exercise
+
+```{r histogram}
+ggplot(bootmeandiff,
+       aes(x = diff_means)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = (mean(iris2_wide[['virginica']]) - mean(iris2_wide[['versicolor']]))), linetype = 2) + 
+  annotate('text', x = 0.75, y = 450, label = 'Original\nDifference') +
+  geom_vline(aes(xintercept = 0), colour = 'blue') +
+  annotate('text', x = 0.1, y= 450, label = 'NULL\nHypothesis', colour = 'blue')
+
+
+
+
+# References: https://ggplot2.tidyverse.org/reference/annotate.html
+```
 
 ## Calculate p-value from the bootstrapping
 
 (graphically) You want to area under the tail/subset of the histogram - starting from where 0 intersects towards the more extreme side (away from the peak)
 
 This is the probability that the bootstrapping distribution is more extreme than the NULL hypothesis value. *Mathematically it is the number of diff_means\< 0 / total \# of points in diff_means*
+
+```{r bootstrap-p}
+with(bootmeandiff,
+     sum(diff_means < 0) / length(diff_means))
+```
+
+::: {.span style="color: firebrick"}
+As stated in the problem, the p-value of the bootstrapped data can be calculated by summing the mean values less than 0, and dividing the sum by the total number of values. In this case, not a single value is less than 0, and thus the calculated p-value is 0, which is less than 0.05 and is also similar to the original:
+
+```         
+p-value = 1.866e-07
+```
+:::
 
 # t-test \[versicolor + 0.5\] with virginica
 
@@ -114,32 +262,63 @@ What happens if we add 0.5 to each element of versicolor (which is the same as a
 
 Alternative way to run the `t.test()` function is to refer to two columns within the data for the `x =` and `y =` options. This can be done either using `data$colname` .. or a more succinct way using the with command (*this avoids repeating the data twice for each column)*
 
-```{r}
+```{r one-sided-plus}
 
+t_test_closer <-
+  with(iris2_wide,
+       t.test(x = versicolor + 0.5, y = virginica, alternative = 'greater')) %>% 
+  print
 ```
 
 Now we see that the p-value is much closer
 
+::: {.span style="color: firebrick"}
+The solution used the alternative argument `'greater'`. However, I believe it is more appropriate to use the `'less'` as the original one-sided t-tests showed that the `'less'` argument yielded a p-value below the critical value. With the addition of 0.5 to all `versicolor` values, the new p-value is greater than 0.05. That being said, when the argument is set to `'greater'`, the p-value is slightly closer to the threshold than the original.
+
+***P.S. I see now that there is a question later about this,***
+:::
+
 ### bootstrapping
 
-```{r}
+```{r boot-strap-closer}
 
+# First create new data frame to include the versicolor values with 0.5 added
+iris2_new <-
+  mutate(iris2_wide, versi2 = versicolor + 0.5)
+
+# Use the new dataframe for bootstrapping
+# For the new mean_versi2, redefine the .df and .column arguments to reflect new ... data; for the virginica, all remains the same and can be left as it was       ... originally.
+boot_new <-
+  tibble(bootnum = 1:10000,
+         mean_versi2 = get_n_boots(.df = iris2_new, .column = 'versi2'),
+         mean_virgi = get_n_boots(.column = 'virginica'),
+         diff_means = mean_virgi - mean_versi2)
+boot_new
 ```
 
 ### histogram
 
 show the same histogram format with the new data
 
-```{r}
-
+```{r hist-new}
+ggplot(boot_new,
+       aes(x = diff_means)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = (mean(iris2_new[['virginica']]) - mean(iris2_new[['versi2']]))), linetype = 2) + 
+  annotate('text', x = 0.24, y = 450, label = 'Original\nDifference') +
+  geom_vline(aes(xintercept = 0), colour = 'blue') +
+  annotate('text', x = -0.08, y= 450, label = 'NULL\nHypothesis', colour = 'blue')
 ```
 
 ### get p-value
 
 Compare with the t-test's p value which is quite close!
 
-```{r}
-
+```{r p-val-closer}
+new_boot_p <-
+  with(boot_new, 
+       sum(diff_means < 0) / length(diff_means))
+new_boot_p
 ```
 
 ## Two tailed t-test
@@ -148,7 +327,12 @@ Compare with the t-test's p value which is quite close!
 
 Do the t-test command above to get the one tailed value for `versicolor + 0.5 < virginica`. The only thing to change from above will be the `alternative = 'greater'` input to the `t.test()` function
 
-```{r}
+```{r two-tailed-less}
+t_test_closer_two <-
+  with(iris2_new,
+       t.test(x = versi2, y = virginica)) %>% 
+  print
+
 ```
 
 ### bootstrapping p-value
@@ -157,18 +341,91 @@ Now use the same bootstrapping data from above to calculate the two tailed p-val
 
 Note: It is assumed that the two-tailed probability is double the one tailed. This works since the t-distribution is symmetric! Our bootstrapping one need not be, so you should calculate the exact value. Refer to the two tailed image in the slides for class17
 
-```{r}
+```{r boot-p-two-tailed}
+# For two-tailed, sum the values greater than or less than 0
+with(boot_new,
+     sum(diff_means < 0 | diff_means > 0) / length(diff_means))
 ```
 
 ### Compare both values in this section
 
 Make some brief note of why the values are alike or different and which one would you trust when they differ?
 
+::: {.span style="color: firebrick"}
+In this case, the bootstrapped p-value for the two-tailed test is quite different from the `t.test()` value. To be honest, I am not entirely sure why this is the case. In the solution,
+
+```         
+[1] "p-value for t-test is: 0.904"
+[1] "p-value for bootstrapping t-test: 0.094"
+```
+
+are said to be "similar," but I think they are pretty different given that the threshold is 0.05. Similarly, in my values, I get
+
+```         
+p-value = 0.1926
+```
+
+for the `t.test()` after adjusting the `alternative = 'greater'` to `'two.sided'` or completely removing the alternative argument. On the other hand, I got
+
+```         
+[1] 0.998
+```
+
+for the bootstrapped p-value. I this case, because both p-values are greater than 0.05 anyway, I would assume that the null hypothesis cannot be rejected either way.
+:::
+
 ## Graph the SEM and 90% CI
 
 *Note: We typically plot the 95% confidence interval, but I want you to do 90% here to understand the concept better/more generally*
 
 To show the confidence intervals, you can use this function `stat_summary()`. Reference - [ggplot documentation](https://ggplot2.tidyverse.org/reference/stat_summary.html). Or look at the source code for the `Exploring SEM, CI within bootstrap dist.` slide on [lecture17.qmd](https://github.com/BIOS-538/BIOS-538.github.io/blob/main/slides/lecture17.qmd)
+
+```{r SEM-CI}
+
+x_int <- mean(boot_new[['diff_means']]) %>% round(3)
+
+boot_sem_ci_plt <- 
+  ggplot(boot_new, 
+         aes(x = diff_means)) + 
+  
+  list(
+    # bootstraps
+    geom_histogram(aes(), alpha = 0.4), # hist of bootstraps
+    geom_vline(aes(xintercept = (x_int)), linetype = 1, colour = 'blue'), # mean
+    annotate(geom = 'text', x = 0.12, y = 30, 
+             label = 'Mean', colour = 'blue')
+    
+    # show original data
+    # geom_point(aes(x = sample_1, y = 0), shape = '|', size = 5), 
+    # geom_point(aes(x = mean(sample_1), y = 0), shape = '|', size = 10, 
+    #            colour = 'blue')
+  ) + 
+  
+  # show SEM interval
+  geom_vline(aes(xintercept = x_int + sd(boot_new[['diff_means']])), linetype = 2, colour = 'red') +
+  geom_vline(aes(xintercept = x_int - sd(boot_new[['diff_means']])), linetype = 2, colour = 'red') + 
+  annotate(geom = 'text', x = -0.01, y = 1000, 
+             label = 'SEM\n(lower)', colour = 'red') +
+  annotate(geom = 'text', x = 0.315, y = 1000, 
+             label = 'SEM\n(upper)', colour = 'red') +
+  # Show CI interval
+  stat_summary(aes(y = 0, xintercept = after_stat(x)), 
+               fun = quantile, 
+               fun.args = list(probs = c(0.025, 0.975)), # 2.5 to 97.5% 
+               geom = "vline", 
+               alpha = 0.5,
+               orientation = "y") +
+  annotate(geom = 'text', x = -0.1, y = 500, 
+             label = '95%\nCI', colour = 'black') +
+  annotate(geom = 'text', x = 0.41, y = 500, 
+             label = '95%\nCI', colour = 'black')
+
+boot_sem_ci_plt
+```
+
+::: {.span style="color: firebrick"}
+I just copied the source code from the lecture 17 `Exploring SEM, CI within bootstrap dist.` slide like the problem suggested. Then I altered the arguments to match those of my bootstrapped data and added colors and labels for the SEM and 95% CIs.
+:::
 
 # Doing this quicker/better using `moderndive` functions
 
