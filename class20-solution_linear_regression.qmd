@@ -50,7 +50,7 @@ This tells us approximately if the ranks of x and corresponding y match up well
 
 -   -1 = order is inverted but perfect match
 
--    0 = order of y is totally jumbled up compared to x =\> their relationship is `not monotonic`
+-   0 = order of y is totally jumbled up compared to x =\> their relationship is `not monotonic`
 
 ```{r rank-corr}
 with(data = mtcars,
