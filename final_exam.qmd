@@ -148,7 +148,13 @@ You treated 10 patients with a medicine, 10 more with a placebo and measure thei
 -   Is this a one tailed or two tailed test?
 
 ::: {.class style="color: firebrick"}
-Answer here
+To show that the medicine group has a higher health score than the placebo group, I would use one-tailed t-test.
+
+-   For the alternative hypothesis
+
+    -   *H*~a~: *μ*~1~ \< *μ*~2~
+
+    -   The alternative hypothesis states that
 :::
 
 Generate uniformly distributed data where the desired/theoretical means differ by *around* 0.3 for each of the two series above, print the data with the labels and demonstrate the `summary()` result of the correct t-test. Use `echo: true` so we can see your code in the report (2 points).
