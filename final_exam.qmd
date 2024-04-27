@@ -141,7 +141,7 @@ You treated 10 patients with a medicine, 10 more with a placebo and measure thei
 
 -   State in mathematical terms, what is the alternate hypothesis? (*hint: mentioned above in english)*
 
-    -   Example: *H*~0~: *μ*~1~ = *μ*~2\ from\ wikipedia/[null\ hypothesis](https://en.wikipedia.org/wiki/Null_hypothesis#Basic_definitions)/basic\ definitions~
+    -   Example: *H*~0~: *μ*~1~ = *μ*~2 from wikipedia/[null hypothesis](https://en.wikipedia.org/wiki/Null_hypothesis#Basic_definitions)/basic definitions~
 
 -   State in English and mathematical form, what is the **null hypothesis**?
 
