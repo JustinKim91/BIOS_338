@@ -150,11 +150,19 @@ You treated 10 patients with a medicine, 10 more with a placebo and measure thei
 ::: {.class style="color: firebrick"}
 To show that the medicine group has a higher health score than the placebo group, I would use one-tailed t-test.
 
--   For the alternative hypothesis
+-   For the alternative hypothesis:
 
     -   *H*~a~: *μ*~1~ \< *μ*~2~
 
-    -   The alternative hypothesis states that
+    -   The alternative hypothesis states that the medicine group has a significantly higher health score when compared to the placebo group.
+
+-   For the Null Hypothesis:
+
+    -   *H*~0~: *μ*~1~ ≤ *μ*~2~
+
+    -   The null hypothesis states that the health score of the medicine group is less than or equal to that of the placebo group.
+
+-   This would be a one-tailed test as it has one critical region, specifically that the upper tail.
 :::
 
 Generate uniformly distributed data where the desired/theoretical means differ by *around* 0.3 for each of the two series above, print the data with the labels and demonstrate the `summary()` result of the correct t-test. Use `echo: true` so we can see your code in the report (2 points).
@@ -167,11 +175,38 @@ Note:
 
 -   You can make the medicine to have a higher mean than the placebo but the other way around is fine too for this illustration. The *actual data will never exactly have the difference of means of 0.3 exactly*
 
-```{r do-t-test}
+```{r do-t-test, echo = TRUE}
 
+# Use runif() to generate two uniformly distributed series between 0 and 1. I ran   ... ran the command until I got two series that the means differed by abour 0.27,  ... and just created the data series by placing the values in vectors. This was so  ... that when the code is run, it wouldn't generate another pair of random series.
+
+# group_medi <- runif(10)
+group_medi <- c(0.985, 0.338, 0.624, 0.397, 0.658, 0.670, 0.895, 0.656, 0.460, 0.548)
+
+# group_placebo <- runif(10)
+group_placebo <- c(0.457, 0.577, 0.137, 0.180, 0.500, 0.387, 0.083, 0.172, 0.428, 0.595)
+# mean(group_medi) - mean(group_placebo)
+# 0.27
+
+medi_data <- data.frame(group_medi, group_placebo)
+
+t_medi <- t.test(group_medi, group_placebo, data = medi_data, alternative = 'greater')
+
+t_medi
 ```
 
 **Bonus:** Show a scatter plot of these two datasets showing their mean and overlay the p-value from the t-test along with what the null hypothesis was on the plot. (2 points)
+
+```{r scatter_plot}
+# # library(tidyverse)
+# mean_medi <- sample(group_medi, size = 10, replace = TRUE)
+# mean_placebo <- sample(group_placebo, size = 10, replace = TRUE)
+# 
+# diff_mean <- mean_medi - mean_placebo
+# 
+# ggplot(medi_data,
+#        aes(x = diff_mean))+
+#   geom_histogram()
+```
 
 #### 2.a.2. t-test part 2 (3 points)
 
@@ -184,7 +219,13 @@ In this variation, a co-worker remarked she is testing a different molecule and 
 -   Is this a one tailed or two tailed test?
 
 ::: {.class style="color: firebrick"}
-Answer here
+This test would now be changed to be a two-tailed test. In the t-test, the upper critical limit would indicate that the medical scores of the medicine group is significantly greater than the placebo group, which would suggest that the molecule works as a medicine. On the other hand, the lower critical limit would indicate a significantly lower score for the medicine group suggesting a toxin-like mechanism.
+
+-   Alternate Hypothesis:
+
+    -   *H*~a~: *μ*~1~ **≠** *μ*~2~
+
+    -   
 :::
 
 -   How would you modify the t-test for the same data above for this new test? (1 point)
