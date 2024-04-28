@@ -283,10 +283,13 @@ ggplot(wider_data,
   annotate('text', x = 5, y= 0.9, label = 'medicine', colour = 'brown1') +
   annotate('text', x = 5.5, y= 0.45, label = 'placebo', colour = 'cyan4')
 
-# References: https://stackoverflow.com/questions/37950511/set-tick-mark-intervals
-#             https://stackoverflow.com/questions/61912689/draw-a-line-between-two-data-points-from-separate-variables-in-ggplot
-
 ```
+
+::: {.class style="color: firebrick"}
+References: <https://stackoverflow.com/questions/37950511/set-tick-mark-intervals>
+
+<https://stackoverflow.com/questions/61912689/draw-a-line-between-two-data-points-from-separate-variables-in-ggplot>
+:::
 
 Can you re-create the same t-test as above (and the same p-value) with a one-sample t-test? (1 point)
 
