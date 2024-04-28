@@ -328,6 +328,8 @@ Reference: <https://machine-learning-made-simple.medium.com/why-you-should-analy
 
 ::: {.class style="color: firebrick"}
 The t-test assumes that the data being analyzed is normally distributed. T-tests are used to compare specific traits or characteristics which represent groups; when the data depicting these traits are normal, the mean become the representative measurement of the central tendency of the trait. The t-test also happens to compare the difference in true means of the data being analyzed, thus it is important that the data being analyzed is normally distributed, and the t-test assumes as much.
+
+Reference: <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6676026/#:~:text=The%20purpose%20of%20the%20t,essential%20in%20the%20t%2Dtest.>
 :::
 
 ## 3. Working with Principal Component Analysis and iris plants (again!) (11+1 points total)
