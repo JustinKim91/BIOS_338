@@ -45,7 +45,7 @@ load the `Tumor` dataset on your own by following these instructions
 
 ```{r load_data, echo = TRUE}
 
-Tumor <- read_csv('../../Data/Tumor.csv')
+Tumor_df <- read_csv('../../Data/Tumor.csv')
 ```
 
 ### 1.a. write 1-3 sentences describing the data (1 point)
@@ -55,7 +55,7 @@ Here's where the data came from ([kaggle datasets](https://www.kaggle.com/datase
 url: <https://www.kaggle.com/datasets/jakeshbohaju/brain-tumor/data>
 
 ::: {.class style="color: firebrick"}
-The Tumor.csv dataset details a handful of first-order features of brain tumors, which are independent descriptors of the tumor. The dataset additionally provides second-order features that provide paired information about the tumor data.
+The Tumor.csv dataset details a handful of first-order features of brain tumors, which are independent descriptors of the tumor. The dataset additionally provides second-order features that provide paired information about the tumor data. These measurements are taken from images of brain CT scans.
 
 References: <https://www.scirp.org/html/2-3400180_19553.htm#txtF3>
 :::
@@ -80,7 +80,15 @@ NOTE:
 2.  *We chose these variables to plot out of many more in the dataset because they are on a similar scale.*
 
 ```{r scatterplot-fn}
+tumor_pair <- function(y , x) {
+  Tumor_df %>% 
+    ggplot(aes(x = .data[[x]], y = .data[[y]], colour = factor(Tumor))) +
+    geom_point(alpha = 0.5) +
+    labs(color = 'Tumor or not') +
+    scale_color_manual(values = c('blue', 'red'), labels = c('Non-Tumor', 'Tumor'))
+}
 
+map2(c('Homogeneity','Energy','ASM'), c('Energy', 'ASM', 'Homogeneity'), ~ tumor_pair(.x, .y)) %>% patchwork::wrap_plots(ncol=1, nrow=3)
 
 ```
 
