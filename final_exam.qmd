@@ -43,9 +43,9 @@ load the `Tumor` dataset on your own by following these instructions
 
 -   Use `echo: true` in the chunk option below to show us the code in your final output
 
-```{r load_data}
+```{r load_data, echo = TRUE}
 
-
+Tumor <- read_csv('../../Data/Tumor.csv')
 ```
 
 ### 1.a. write 1-3 sentences describing the data (1 point)
@@ -55,7 +55,9 @@ Here's where the data came from ([kaggle datasets](https://www.kaggle.com/datase
 url: <https://www.kaggle.com/datasets/jakeshbohaju/brain-tumor/data>
 
 ::: {.class style="color: firebrick"}
-Write answer here
+The Tumor.csv dataset details a handful of first-order features of brain tumors, which are independent descriptors of the tumor. The dataset additionally provides second-order features that provide paired information about the tumor data.
+
+References: <https://www.scirp.org/html/2-3400180_19553.htm#txtF3>
 :::
 
 ### 1.b. Make scatterplots (3 points)
