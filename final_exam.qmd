@@ -152,7 +152,18 @@ It is more appropriate to use a one-tailed t-test in this case. Specifically, it
 Plot 1D [jitter](https://ggplot2.tidyverse.org/reference/geom_jitter.html) plots (y = Tumor, x = each of the variables) and indicate the mean with a line/other distinct shape (using `shape = '|'`) . Show the p-value between the
 
 ```{r plt-with-p-value}
+tumor_p <- function(variable) {
+  Tumor_df %>% 
+    ggplot(aes(x = .data[[variable]], y = factor(Tumor), colour = factor(Tumor))) + 
+    geom_jitter(alpha = 0.5) +
+    stat_summary(fun = mean, geom = "point", shape = '|', size = 5, colour = 'black') +
+    labs(title = paste(variable, "\n P-value:", round(tumor_t(variable)$p.value, 5)), color = "Presence of Tumor") +
+    xlab(variable) +
+    ylab('Tumor') +
+    scale_color_manual(values = c('blue', 'red'), labels = c('No Tumor', 'Tumor'))
+}
 
+map(c('Homogeneity', 'ASM','Energy'), ~ tumor_p(.x)) %>% patchwork::wrap_plots(ncol=1, nrow=3)
 ```
 
 ### 1.f. Interpret results and reflect on future analysis ideas (2 points)
@@ -160,7 +171,9 @@ Plot 1D [jitter](https://ggplot2.tidyverse.org/reference/geom_jitter.html) plots
 Interpret your results. How would you continue analyzing this data (no need to actually do it, but think about what else you could look at to better understand images with and without tumors (2 points)
 
 ::: {.class style="color: firebrick"}
-Answer here
+In the results above, the p-value for each plot is extremely small and is rounded to 0, indicating that there is a strong statistical significance of the presence of a tumor on the observed features. We can further analyze this data by performing a PCA analysis to reduce the number of variables and noise. PCA will also help to identify which features are most responsible for the variances between tumorous and non tumorous traits.
+
+Reference: <https://builtin.com/data-science/step-step-explanation-principal-component-analysis>
 :::
 
 ## 2. General statistics conceptual questions (14+2 points total)
@@ -310,12 +323,10 @@ ggplot(wider_data,
   geom_point(aes(y = medicine, colour = 'blue')) +
   geom_point(aes(y = placebo, colour = 'red')) +
   geom_segment(wider_data,
-               mapping = aes(y = medicine, yend = placebo)) +
-  labs(x = "Participant", y = "Health Score") +
+               mapping = aes(xend = index, y = medicine, yend = placebo)) +
+  labs(x = "Participant", y = "Health Score", colour = 'Treatment') +
   scale_x_continuous(breaks = seq(0, 10, by = 1)) + # Set interval for x-axis
-  theme(legend.position = 'none') +
-  annotate('text', x = 5, y= 0.9, label = 'medicine', colour = 'brown1') +
-  annotate('text', x = 5.5, y= 0.45, label = 'placebo', colour = 'cyan4')
+  scale_color_manual(values = c("blue", "red"), labels = c('Medicine', 'Placebo'))
 
 ```
 
