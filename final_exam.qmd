@@ -148,7 +148,7 @@ You treated 10 patients with a medicine, 10 more with a placebo and measure thei
 -   Is this a one tailed or two tailed test?
 
 ::: {.class style="color: firebrick"}
-To show that the medicine group has a higher health score than the placebo group, I would use one-tailed t-test.
+To show that the medicine group has a higher health score than the placebo group, I would use two-sample t-test.
 
 -   For the alternative hypothesis:
 
@@ -179,33 +179,32 @@ Note:
 
 # Use runif() to generate two uniformly distributed series between 0 and 1. I ran   ... ran the command until I got two series that the means differed by abour 0.27,  ... and just created the data series by placing the values in vectors. This was so  ... that when the code is run, it wouldn't generate another pair of random series.
 
-# group_medi <- runif(10)
-group_medi <- c(0.985, 0.338, 0.624, 0.397, 0.658, 0.670, 0.895, 0.656, 0.460, 0.548)
+group_medi <- runif(10, min = 0.7, max = 0.9)
 
-# group_placebo <- runif(10)
-group_placebo <- c(0.457, 0.577, 0.137, 0.180, 0.500, 0.387, 0.083, 0.172, 0.428, 0.595)
-# mean(group_medi) - mean(group_placebo)
-# 0.27
 
-medi_data <- data.frame(group_medi, group_placebo)
+group_placebo <- runif(10, min = 0.4, max = 0.6)
 
-t_medi <- t.test(group_medi, group_placebo, data = medi_data, alternative = 'greater')
 
+medi_data <- data.frame(
+  group = rep(c("medicine", "placebo"), times = c(10,10)),
+  score = c(group_medi, group_placebo)
+)
+
+t_medi <- t.test(score ~ group, data = medi_data, alternative = 'greater')
+
+summary(t_medi)
 t_medi
 ```
 
 **Bonus:** Show a scatter plot of these two datasets showing their mean and overlay the p-value from the t-test along with what the null hypothesis was on the plot. (2 points)
 
 ```{r scatter_plot}
-# # library(tidyverse)
-# mean_medi <- sample(group_medi, size = 10, replace = TRUE)
-# mean_placebo <- sample(group_placebo, size = 10, replace = TRUE)
-# 
-# diff_mean <- mean_medi - mean_placebo
-# 
-# ggplot(medi_data,
-#        aes(x = diff_mean))+
-#   geom_histogram()
+# library(tidyverse)
+ggplot(medi_data,aes(x = group, y = score, color = group)) +
+  geom_jitter(width = 0.2, size = 2) +
+  stat_summary(fun = mean, geom = "point", shape = 10, size = 4, color = 'black') +
+  theme(legend.position = 'none')
+
 ```
 
 #### 2.a.2. t-test part 2 (3 points)
@@ -225,14 +224,25 @@ This test would now be changed to be a two-tailed test. In the t-test, the upper
 
     -   *H*~a~: *μ*~1~ **≠** *μ*~2~
 
-    -   
+    -   The health scores of the medicine and placebo group are not the same.
+
+-   Null Hypothesis:
+
+    -   *H*~0~: *μ*~1~ = *μ*~2~
+
+    -   The health scores of medicine group and the placebo group are the same.
+
+-   This is a two-tailed test
 :::
 
 -   How would you modify the t-test for the same data above for this new test? (1 point)
 
 ```{r co-workers-t-test}
 
+# Change the alternative argument to 'two.sided'
+t_medi2 <- t.test(score ~ group, data = medi_data, alternative = 'two.sided')
 
+t_medi2
 ```
 
 #### 2.a.3. t-test part 3 (4 points)
@@ -241,29 +251,55 @@ You have a similar experiment now but the same 10 patients are monitored with pl
 
 ```{r modify-t-test}
 
+# Pair the health scores of the medicine and placebo group
+t_medi_paired <- t.test(score ~ group, data = medi_data, alternative = 'two.sided', paired = TRUE)
 
+t_medi_paired
 ```
 
 ::: {.class style="color: firebrick"}
-Brief explanation
+The paired argument in `t.test()` is set to `'FALSE'` by default, which specifies that the samples being compared are independent from each other. However, if you change the argument to read `'TRUE'`, the t-test will understand that the samples are not independent from one another and that the data come from the same individuals.
 :::
 
 Show the above linked data as a graph with points of the same individual joined by a line (2 point2)
 
 ```{r plot-paired}
+medi_data_wide <- medi_data %>% 
+  group_by(group)
 
+wider_data <- mutate(medi_data_wide, index = row_number()) %>% 
+  pivot_wider(names_from = group,
+              values_from = score)
+
+ggplot(wider_data,
+       aes(x = index)) +
+  geom_point(aes(y = medicine, colour = 'blue')) +
+  geom_point(aes(y = placebo, colour = 'red')) +
+  geom_segment(wider_data,
+               mapping = aes(y = medicine, yend = placebo)) +
+  labs(x = "Participant", y = "Health Score") +
+  scale_x_continuous(breaks = seq(0, 10, by = 1)) + # Set interval for x-axis
+  theme(legend.position = 'none') +
+  annotate('text', x = 5, y= 0.9, label = 'medicine', colour = 'brown1') +
+  annotate('text', x = 5.5, y= 0.45, label = 'placebo', colour = 'cyan4')
+
+# References: https://stackoverflow.com/questions/37950511/set-tick-mark-intervals
+#             https://stackoverflow.com/questions/61912689/draw-a-line-between-two-data-points-from-separate-variables-in-ggplot
 
 ```
 
 Can you re-create the same t-test as above (and the same p-value) with a one-sample t-test? (1 point)
 
 ```{r recreate-one-sample-t-test}
+diff <- medicine - placebo
 
-
+t.test(diff, mu = 0, alternative = 'two.sided')
 ```
 
 ::: {.class style="color: firebrick"}
-Brief explanation
+In the one-sample t-test, I only use the sampling from when the participants were given actual medicine. In order to replicate the two-sampled t-test above, I found the difference in the health scores of the medicine and placebo group. Then, I ran the vector of differences as the subject of the t.test and set the theoretical mean value of the differences to 0. This essentially replicates the mechanism of the two-sampled t-test.
+
+Reference: <http://www.sthda.com/english/wiki/one-sample-t-test-in-r>
 :::
 
 ### 2.b. Explain the meaning of p-value (2 points)
@@ -271,19 +307,27 @@ Brief explanation
 What is a p-value for hypothesis tests? What is one common mis-interpretation of p-value, elaborate why it is inaccurate. (2 points) See controversies here: [wiki](https://en.wikipedia.org/wiki/Misuse_of_p-values#:~:text=Misuse%20of%20p%2Dvalues%20is,with%20a%20specified%20statistical%20model.), [nature](https://www-nature-com.ezproxy.rice.edu/articles/nature.2016.19503),
 
 ::: {.class style="color: firebrick"}
-Answer here
+The p-value is the probability that the difference in means of two samples is a result of chance; thus, the lower the p-value, the lower the chances that the observed difference in means of two mean values is a random occurrence and actually has significance.
+
+A common misconception is that the p-value is the probability that the null hypothesis is true. This is inaccurate, as the null hypothesis simply states that the values of comparison are not significantly different. Rather, the p-value describes the probability that the actual effect of variable is as extreme as the observed effect. So, if the null hypothesis is *actually* true, then the p-value would be greater than the critical value (0.05).
+
+Reference: <https://en.wikipedia.org/wiki/Misuse_of_p-values>
 :::
 
 ### 2.c. Know thy distribution (2 point)
 
 -   Why is it important to know the distribution of our data before continuing analysis? (0.5 point)
 
-<!-- -->
+::: {.class style="color: firebrick"}
+It is important to know the distribution of your data to ensure that you can conduct accurate data analysis. Some statistical tests are ground in the assumption that the data being analyzed is normally distributed; if your data is non-normally distributed such tests would yield inaccurate analyses.
+
+Reference: <https://machine-learning-made-simple.medium.com/why-you-should-analyze-the-distribution-of-your-data-695fd9f0f1be>
+:::
 
 -   Which of the statistical concepts discussed in class assume certain distributions for the data, which distribution and briefly why do they need this assumption? (1.5 point)
 
 ::: {.class style="color: firebrick"}
-Answer here
+The t-test assumes that the data being analyzed is normally distributed. T-tests are used to compare specific traits or characteristics which represent groups; when the data depicting these traits are normal, the mean become the representative measurement of the central tendency of the trait. The t-test also happens to compare the difference in true means of the data being analyzed, thus it is important that the data being analyzed is normally distributed, and the t-test assumes as much.
 :::
 
 ## 3. Working with Principal Component Analysis and iris plants (again!) (11+1 points total)
