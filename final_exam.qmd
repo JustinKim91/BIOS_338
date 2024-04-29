@@ -388,6 +388,16 @@ Reference: <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6676026/#:~:text=The%20
 
 ::: {.class style="color: firebrick"}
 3.x. bonus: (+1 bonus) : identify and note what each library is for (along with 1 function used from each)
+
+1.  The `corr` library is used to create data frames for correlation analysis.
+2.  The `ggfortify` library provides unified plotting tools to expand upon `ggplot2` (ie. PCA analysis tools).
+3.  The `dplyr` library "is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges"
+
+References:
+
+1.  <https://corrr.tidymodels.org/>
+2.  <https://cran.r-project.org/web/packages/ggfortify/index.html>
+3.  <https://dplyr.tidyverse.org/>
 :::
 
 ```{r bring in plant data}
@@ -437,9 +447,46 @@ Run a PCA analysis using the `prcomp()` function. Create a screeplot that shows 
 
 ```{r run PCA}
 # run this line to see documentation for the function
-?prcomp()
+# ?prcomp()
 
+# Run PCA
+iris_pca <- iris_data[,-5] %>% prcomp(scale = TRUE)
+
+# Find variance of each variable
+iris_var <- iris_pca$sdev^2 / sum(iris_pca$sdev^2) # sdev is treated as the square root of the eigen values
+
+iris_tib <- tibble(Group = c('PC1','PC2', 'PC3', 'PC4'), Value = iris_var * 100)
+
+#Scree Plot
+iris_splot <- iris_tib %>% 
+  ggplot(aes(y = Value, x = Group)) +
+  geom_bar(stat = 'identity', fill = 'dodgerblue') +
+  labs(title = 'Scree Plot',
+       x = 'Principle Component',
+       y = 'Variance Explained (%)')
+iris_splot
+
+#Biplot of PC1 and PC2
+iris_bplot <- autoplot(iris_pca, data = iris, colour = 'Species', 
+                       loadings = TRUE, 
+                       loadings.colour = 'blue', 
+                       loadings.label = TRUE,
+                       loadings.label.size = 4,
+                       loadings.label.colour = 'black')
+iris_bplot
+
+summary(iris_pca)
 ```
+
+::: {.class style="color: firebrick"}
+Reference:
+
+<https://stats.stackexchange.com/questions/254592/calculating-pca-variance-explained>
+
+<https://www.geeksforgeeks.org/how-to-make-scree-plot-in-r-with-ggplot2/>
+
+<https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_pca.html>
+:::
 
 #### 3.c.2. Better plots with `autoplot()` (1 point)
 
@@ -448,7 +495,14 @@ Now, use the function `autoplot()` from `ggfortify` package to better view the r
 *Hint: You need to search for how to add loadings to this!*
 
 ```{r autoplot}
-
+# Same as the biplot from 3.c.1
+iris_bplot <- autoplot(iris_pca, data = iris, colour = 'Species', 
+                       loadings = TRUE, 
+                       loadings.colour = 'blue', 
+                       loadings.label = TRUE,
+                       loadings.label.size = 4,
+                       loadings.label.colour = 'black')
+iris_bplot
 ```
 
 #### 3.d. Explain your results. (3 points)
@@ -462,7 +516,9 @@ Be sure to mention the following:
 -   Does the data cluster well into the known groups of species?
 
 ::: {.class style="color: firebrick"}
-Answer here
+1.  According to the eigenvectors, the petal length, petal width, and sepal length tend to load on PC1. The magnitude of the associated eigenvalues is larger for the petal traits that the sepal length, which indicates that the variance of PC1 is more greatly explained by the petal traits.
+2.  You would only need PC1 and PC2, given that these two principle components explain over 95% of the total variance in the data.
+3.  Yes, the data points within the clusters for each species seem to be strongly associated with other data points within the same species.
 :::
 
 ## 4. Analyzing housing data (11 points)
@@ -608,7 +664,7 @@ For the questions, I would like to acknowledge these sources of inspiration
 ## Solutions
 
 ::: {.class style="color: firebrick"}
-Your attributions here!
+Collaborations with groupmates: Seungheon Lee and Gary Shi
 :::
 
 ::: {style="color: teal"}
