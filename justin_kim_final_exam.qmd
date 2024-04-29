@@ -2,6 +2,7 @@
 title: "BIOS 338/538 final exam"
 format: 
   html:
+    self-contained: true
     embed-resources: true
 editor: visual
 ---
