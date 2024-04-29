@@ -224,7 +224,6 @@ Note:
 
 ```{r do-t-test, echo = TRUE}
 
-# Use runif() to generate two uniformly distributed series between 0 and 1. I ran   ... ran the command until I got two series that the means differed by abour 0.27,  ... and just created the data series by placing the values in vectors. This was so  ... that when the code is run, it wouldn't generate another pair of random series.
 
 group_medi <- runif(10, min = 0.7, max = 0.9)
 
