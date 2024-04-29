@@ -339,7 +339,7 @@ References: <https://stackoverflow.com/questions/37950511/set-tick-mark-interval
 Can you re-create the same t-test as above (and the same p-value) with a one-sample t-test? (1 point)
 
 ```{r recreate-one-sample-t-test}
-diff <- medicine - placebo
+diff <- group_medi - group_placebo
 
 t.test(diff, mu = 0, alternative = 'two.sided')
 ```
