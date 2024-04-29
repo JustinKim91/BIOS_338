@@ -388,8 +388,6 @@ Reference: <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6676026/#:~:text=The%20
 
 ::: {.class style="color: firebrick"}
 3.x. bonus: (+1 bonus) : identify and note what each library is for (along with 1 function used from each)
-
-Answer here
 :::
 
 ```{r bring in plant data}
@@ -405,7 +403,7 @@ iris_data <- as_tibble(iris)
 ### 3.a. Write 1-3 sentences describing the data (1 point).
 
 ::: {.class style="color: firebrick"}
-Answer here
+The iris dataset contains measurements of the Sepal Length, Sepal Width, Petal Width, and Petal Length of three species of iris flowers. Each species has 50 entries.
 :::
 
 ### 3.b. Correlations between the variables (2 point).
@@ -426,7 +424,7 @@ iris_corr
 #### 3.b.2. Are any of the variables highly correlated? (absolute value of the correlation \>0.6) (1 point)
 
 ::: {.class style="color: firebrick"}
-Answer here
+Sepal Length is highly correlated with Petal Length and Petal Width. Petal Length and Petal Width are also highly correlated.
 :::
 
 ### 3.c. Running PCA and analyzing (8 points)
