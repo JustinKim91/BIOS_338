@@ -1,0 +1,631 @@
+---
+title: "BIOS 338/538 final exam"
+format: 
+  html:
+    embed-resources: true
+editor: visual
+---
+
+**Note**: About references
+
+-   Include references in the plain text window (rather than as a comment within R chunks)
+
+    -   Lack of adequate references (*where concepts are complex, and require searching around*) will be penalized with upto -5 points
+
+## Points distribution
+
+|       | 0   | Q1  | Q2  | Q3  | Q4  | sum           |
+|-------|-----|-----|-----|-----|-----|---------------|
+| Reg   | \-  | 11  | 14  | 11  | 11  | 35 (*not 47*) |
+| Bonus | \-  | 2   | 2   | 1   | \-  | 5             |
+
+## **Important message:**
+
+1.  Answer question **Q2** first ;
+2.  Then **choose 2 out of the 3** remaining questions to answer (2 out of **Q1, Q3, Q4**)
+3.  Then spend time on the bonuses!
+
+## 1. Describing, plotting, and interpreting data about MRI images of tumors (11 points + 2 bonus)
+
+Concepts illustrated : *function -\> vectorization, t-test and interpretation*
+
+```{r libraries}
+library(tidyverse)
+```
+
+### 1.x. Load data (1 point)
+
+load the `Tumor` dataset on your own by following these instructions
+
+-   Put the file in a separate data/ folder within in your Rproject (`.Rproj`) containing folder
+
+-   Load the `.csv` file using `relative path` starting from the folder this `.qmd` file is in
+
+-   Use `echo: true` in the chunk option below to show us the code in your final output
+
+```{r load_data}
+
+tumor <- read_csv("Tumor.csv")
+tumor
+```
+
+### 1.a. write 1-3 sentences describing the data (1 point)
+
+Here's where the data came from ([kaggle datasets](https://www.kaggle.com/datasets/jakeshbohaju/brain-tumor/data)) for context. *You may need to search the internet for some of the terms in order to explain them*
+
+url: <https://www.kaggle.com/datasets/jakeshbohaju/brain-tumor/data>
+
+::: {.class style="color: firebrick"}
+This data is mostly numeric features with only one categorical feature that describes which image the statistics are taken from. The different features are important for determining whether a tumor is malignant or not.
+:::
+
+### 1.b. Make scatterplots (3 points)
+
+*Read full question 1.b. before answering!*
+
+The goal here is to make three pairwise scatterplots of `Homogeneity`, `Energy` and `ASM`, `color`ed by whether the image was a `tumor` or not. You need to rename the legend to be more intuitive than 0 and 1.
+
+Since the same commands need to be repeated multiple times, we will be more efficient and *try not to repeat code*. So
+
+-   Make a function to generate these 3 plots with less code repetition (1 point). The function should take in the x and y column names to be plotted. Calling this function thrice with these 3 different pairs of column pairs makes the 3 plots (*You can add more function arguments if they are useful).*
+
+    -   Reduce the transparency of the points so we can see overlapping points better
+
+-   (1 point) Call this function in a vectorized manner using `purrr::` package commands on the 3 pairs of vectors and stitch the images together using the `patchwork` package (using hints from `class21a_linreg-continued.qmd`), Now, collect the legends to show only a single legend for all 3 plots. (1 point)
+
+NOTE:
+
+1.  You will need to change the binary variables to factors to get the proper scale.
+2.  *We chose these variables to plot out of many more in the dataset because they are on a similar scale.*
+
+```{r scatterplot-fn}
+
+makescatter <- function(.x = 'Homogeneity', 
+                        .y = 'Energy', 
+                        .data = tumor)
+{
+  ggplot(.data, 
+         aes(x = .data[[.x]], y = .data[[.y]],
+             colour = as_factor(Tumor)
+         )) +
+    
+    geom_point(alpha = 0.1) +
+    ggtitle("Tumors")
+}
+
+# test the function
+makescatter()
+
+# map2(
+#   
+# )
+
+
+tumor %>%
+  ggplot(aes(
+    x = ASM, y = Energy,
+    col = as_factor(Tumor)
+  )) +
+  geom_point(alpha = 0.05) +
+  ggtitle("Tumors")
+
+
+```
+
+### 1.c.bonus. Plotting with scaling (2 points):
+
+Try plotting Coarseness vs. Energy. Now plot again, but scale the variables. (1 point) Explain the significance of the `scale()` function and why it matters here (1 point)
+
+```{r scaled-plot}
+Tumor %>% 
+  ggplot(aes(y = scale(Coarseness, center = TRUE, scale = FALSE), x = Energy, colour = factor(Tumor))) +
+  geom_point(alpha = 0.5) +
+  scale_color_manual(values = c('blue', 'red'), labels = c('No Tumor', 'Tumor')) +
+  labs(color = 'Presence of Tumor', y = 'Coarseness')
+```
+
+### 1.d. Do any patterns seem to emerge in the data? (1 point)
+
+::: {.class style="color: firebrick"}
+One example response: The presence of a tumor seems to decrease homogeneity both when compared to energy and ASM. Additionally the comparison between ASM and energy follows a much closer line than comparisons to homogeneity, which could indicate that homogeneity has a much wider range of values or is more variable than the other two measured samples which causes the scatterplot to be so scattered. In this comparison the presence of tumors also lowers the energy and ASM, similar to the other ones.
+
+Yes very clearly lol
+:::
+
+### 1.e. t-tests for tumor vs non-tumor (3 points)
+
+Now we are looking for columns in the dataset that vary between tumor and non-tumour samples using t-tests to attach statistical significance.
+
+#### 1.e.1. Do the bottom 2 segments using a function / vectorization to minimize code repetition (1 point)
+
+#### 1.e.2. do t-test and justify the tails (1 point)
+
+Run three t.tests to look at **differences** between tumor and non-tumor images using the Energy, Homogeneity, and ASM variables. Note that tumor is the group variable!
+
+Explain if the best choice here is to do a one-tailed t-test or a 2-tailed t-test and what in the question guides you to this choice. *Note that 2.a.1 & 2 walks through the technical difference between these t-tests so you don't need to get into those here. Only need a brief answer here!*
+
+```{r tumor t.tests}
+t.test(Energy ~ Tumor, data = tumor)
+
+t.test(ASM ~ Tumor, data = tumor)
+
+t.test(Homogeneity ~ Tumor, data = tumor)
+
+#or 
+
+tumor_t <- function(variable) {
+  
+  no_tumor <- Tumor %>% filter(Tumor == 0) %>% pull({{variable}})
+  tumor <- Tumor %>% filter(Tumor == 1) %>% pull({{variable}})
+  
+  t.test(no_tumor, tumor, alternative = 'greater')
+}
+
+map(c('ASM','Energy','Homogeneity'), ~ tumor_t(.x)) # Use map to apply t.test to each feature
+```
+
+#### 1.e.3. Add p-value onto plots (1 point)
+
+Plot 1D [jitter](https://ggplot2.tidyverse.org/reference/geom_jitter.html) plots (y = Tumor, x = each of the variables) and indicate the mean with a line/other distinct shape (using `shape = '|'`) . Show the p-value between the
+
+```{r}
+tumor_p <- function(variable) {
+  Tumor_df %>% 
+    ggplot(aes(x = .data[[variable]], y = factor(Tumor), colour = factor(Tumor))) + 
+    geom_jitter(alpha = 0.5) +
+    stat_summary(fun = mean, geom = "point", shape = '|', size = 5, colour = 'black') +
+    labs(title = paste(variable, "\n P-value:", round(tumor_t(variable)$p.value, 5)), color = "Presence of Tumor") +
+    xlab(variable) +
+    ylab('Tumor') +
+    scale_color_manual(values = c('blue', 'red'), labels = c('No Tumor', 'Tumor'))
+}
+
+map(c('Homogeneity', 'ASM','Energy'), ~ tumor_p(.x)) %>% patchwork::wrap_plots(ncol=1, nrow=3)
+```
+
+### 1.f. Interpret results and reflect on future analysis ideas (2 points)
+
+Interpret your results. How would you continue analyzing this data (no need to actually do it, but think about what else you could look at to better understand images with and without tumors (2 points)
+
+::: {.class style="color: firebrick"}
+One example response: All of these T tests resulted in p value \< 0.05 which means that there is a statistical significance between the tumor and non tumor group. From this we could narrow in continuing studies to examine more closely how these specific variables might be impacted by the presence of a tumor since it is established that there is a difference. In the future we could also see if the size of the tumor makes a difference in these variables by comparing smaller tumors to larger ones and seeing if it is the presence of the tumor (regardless of size) that causes a change, or the different sizes.
+:::
+
+## 2. General statistics conceptual questions (14+2 points total)
+
+### 2.a. Understanding of t-tests (10 points)
+
+We will do a short exercise to demonstrate your understanding of t-tests, and specifically the difference between a *one-tailed (one-sided)* and *two-tailed* t-test.
+
+#### 2.a.1. t-test part 1 (3 points)
+
+You treated 10 patients with a medicine, 10 more with a placebo and measure their health score (0 to 1). What hypothesis test (*give full detailed name of the test*) would you do to show that the medicine group has a **higher** health score compared to the placebo group. (1 point)
+
+-   State in mathematical terms, what is the alternate hypothesis? (*hint: mentioned above in english)*
+
+-   State in English and mathematical form, what is the **null hypothesis**?
+
+-   Is this a one tailed or two tailed test?
+
+::: {.class style="color: firebrick"}
+**Alternate**: H1: $\mu_{medicine} > \mu_{placebo}$
+
+**Null**: H0: (opposite of H1) : $\mu_{medicine} <= \mu_{placebo}$
+
+-   Under the null hypothesis, the medicine group has less than or equal mean value as the placebo group
+
+**Tails**: one tailed
+
+-   Explanation: $\mu_{medicine} > \mu_{placebo}$ is one tail ; $\mu_{medicine} < \mu_{placebo}$ would be the other tail; of the null distribution (t-distribution for t-test or bootstrapping distribution otherwise). And the central part of the null distribution is for $\mu_{medicine} = \mu_{placebo}$
+:::
+
+Generate uniformly distributed data where the desired/theoretical means differ by *around* 0.3 for each of the two series above, print the data with the labels and demonstrate the `summary()` result of the correct t-test. Use `echo: true` so we can see your code in the report (2 points).
+
+Note:
+
+-   The health scores should be strictly between 0 and 1
+
+-   There is some flexibility in how you can make the vectors here, all we want is their difference of means is 0.3
+
+-   You can make the medicine to have a higher mean than the placebo but the other way around is fine too for this illustration. The *actual data will never exactly have the difference of means of 0.3 exactly*
+
+```{r do-t-test}
+placebo_mean <- 0.3
+min_medicine <- 0.2
+
+set.seed(1)
+
+# generate data
+placebo <- runif(10, min = 0, max = 2 * placebo_mean)
+
+cat('placebo: \t', round(placebo, 2) %>% sort, '\n')
+
+
+medicine <- runif(10, min = min_medicine, 
+                  max = (placebo_mean + 0.3) * 2 - min_medicine )
+
+cat('medicine: \t', round(medicine, 2) %>% sort, '\n')
+
+
+# verify the difference of means
+mean(medicine) - mean(placebo)
+
+
+# do t-test
+t.test(x = medicine, y = placebo, alternative = 'greater')
+```
+
+**Bonus:** Show a scatter plot of these two datasets showing their mean and overlay the p-value from the t-test along with what the null hypothesis was on the plot. (2 points)
+
+#### 2.a.2. t-test part 2 (3 points)
+
+In this variation, a co-worker remarked she is testing a different molecule and is unsure if it works like a medicine or toxin yet. So how would you change the test to account for either of these possibilities? (2 points)
+
+-   State, both in English and mathematical terms, what is the alternate hypothesis? (*hint: mentioned above in english)*
+
+-   State in English and mathematical form, what is the **null hypothesis**?
+
+-   Is this a one tailed or two tailed test?
+
+::: {.class style="color: firebrick"}
+**Alternate**: H1: $\mu_{medicine} \neq \mu_{placebo}$
+
+-   side note: ([source](https://latex-tutorial.com/not-equal-latex/) for $\neq$ symbol)
+
+**Null**: H0: (opposite of H1) : $\mu_{medicine} = \mu_{placebo}$
+
+Under the null hypothesis, the medicine group has equal mean value as the placebo group
+
+**Tails**: two-tailed (since $\neq$ case covers both $< and >$)
+:::
+
+-   How would you modify the t-test for the same data above for this new test? (1 point)
+
+```{r co-workers-t-test}
+
+t.test(x = medicine, y = placebo, alternative = 'two.sided')
+```
+
+#### 2.a.3. t-test part 3 (4 points)
+
+You have a similar experiment now but the same 10 patients are monitored with placebo and medicine (2.a.1) over two different weeks; assume the dataset is ordered such that 1st patient in placebo group matches the first patient in medicine group. How will you modify the t-test to capture that there are not 2 independent samples of patients in this case? (1 point)
+
+```{r modify-t-test}
+
+t.test(x = medicine, y = placebo, alternative = 'greater', paired = TRUE)
+```
+
+::: {.class style="color: firebrick"}
+Need to use a paired two-sample t-test
+:::
+
+Show the above linked data as a graph with points of the same individual joined by a line (2 point2)
+
+```{r plot-paired}
+
+trial_data <- tibble(placebo, medicine) %>% 
+  mutate(individual = row_number()) %>% 
+  
+  # put both groups into same column
+  pivot_longer(cols = !individual, names_to = 'treatment', 
+               values_to = 'health_score') %>% 
+  mutate(treatment = fct_relevel(treatment, 'placebo')) # plot placebo first
+
+# plot connected 
+ggplot(trial_data, aes(x = treatment, y = health_score)) + geom_point() + 
+  geom_line(aes(group = individual))
+```
+
+Can you re-create the same t-test as above (and the same p-value) with a one-sample t-test? (1 point)
+
+```{r recreate-one-sample-t-test}
+
+t.test(x = medicine - placebo, mu = 0, alternative = 'greater')
+```
+
+### 2.b. Explain the meaning of p-value (2 points)
+
+What is a p-value for hypothesis tests? What is one common mis-interpretation of p-value, elaborate why it is inaccurate. (2 points) See controversies here: [wiki](https://en.wikipedia.org/wiki/Misuse_of_p-values#:~:text=Misuse%20of%20p%2Dvalues%20is,with%20a%20specified%20statistical%20model.), [nature](https://www-nature-com.ezproxy.rice.edu/articles/nature.2016.19503),
+
+::: {.class style="color: firebrick"}
+A p-value is a metric that explains the probability that some type of statistical measure is true. .People make the assumption that if a p-value is less than the given confidence level than the relationship must be significant. However, p-values only indicate the probability of a given result being significant. For a .95 confidence level there is still a 5% chance the result is not actually significant. This is called a type one error.
+:::
+
+### 2.c. Know thy distribution (2 point)
+
+-   Why is it important to know the distribution of our data before continuing analysis? (0.5 point)
+
+::: {.class style="color: firebrick"}
+You may make assumptions about the data that are not true. This will lead you to use an incorrect statistical test that may reach incorrect conclusions about the data.
+:::
+
+-   Which of the statistical concepts discussed in class assume certain distributions for the data, which distribution and briefly why do they need this assumption? (1.5 point)
+
+::: {.class style="color: firebrick"}
+If we do not know the distribution of our data, we may make assumptions about it. Many common statistical tests require that our data is normally distributed to properly conduct the t-test, otherwise non-parametric tests are needed. If we do not validate our distributions we may come to incorrect conclusions about our data.
+:::
+
+## 3. Working with Principal Component Analysis and iris plants (again!) (11+1 points total)
+
+#### Bringing in the data. DO NOT EDIT!
+
+##### 3.x. bonus (+1 point) : explaining purpose of each library in this script
+
+::: {.class style="color: firebrick"}
+corrr is for plots that show correlation between different variables
+
+ggfortify is a unified plotting tool for the PCA
+
+dplyr is a package for data wrangling
+:::
+
+```{r bring in plant data}
+library(corrr)
+library(ggfortify)
+library(dplyr)
+
+data(iris)
+iris_data <- as_tibble(iris)
+
+```
+
+### 3.a. Write 1-3 sentences describing the data (1 point).
+
+::: {.class style="color: firebrick"}
+There are four numeric features and one categorical. The numeric features describes attributes of the reproductive organs of different iris species. The categorical column is the iris species.
+:::
+
+### 3.b. Correlations between the variables (2 point).
+
+#### 3.b.1. Calculate correlations between the variables. (1 point)
+
+*Hint. You need to exclude the species column*
+
+```{r correlations}
+# hint
+?correlate()
+
+iris_corr <- iris_data[,-5] %>%
+  correlate()
+iris_corr
+```
+
+#### 3.b.2. Are any of the variables highly correlated? (absolute value of the correlation \>0.6) (1 point)
+
+::: {.class style="color: firebrick"}
+Yes, quite a few of them are strongly positively correlated
+:::
+
+### 3.c. Running PCA and analyzing (8 points)
+
+#### 3.c.1. Generate the PCA (4 points)
+
+Run a PCA analysis using the `prcomp()` function. Create a screeplot that shows the proportion of variance explained by each variable, a biplot of PC1 and PC2, and give a summary of the results with the `summary()` function
+
+*Hint. Remember to scale the variables and remove species column!*
+
+```{r run PCA}
+# run this line to see documentation for the function
+?prcomp()
+
+# run PCA
+results <- prcomp(iris_data[,-5], scale=TRUE)
+
+# scree plot
+screeplot(results)
+
+# Visualize the results with a biplot
+biplot(results)
+
+# Summary of components 
+summary(results)
+
+```
+
+#### 3.c.2. Better plots with `autoplot()` (1 point)
+
+Now, use the function `autoplot()` from `ggfortify` package to better view the results of the biplot. Be sure to include the loadings.
+
+*Hint: You need to search for how to add loadings to this!*
+
+```{r autoplot}
+autoplot(results, data = iris, colour = 'Species', loadings = TRUE, loadings.label = TRUE)
+```
+
+#### 3.d. Explain your results. (3 points)
+
+Be sure to mention the following:
+
+-   Which traits tend to load on the same components?
+
+-   How many components do you need to include to explain at least 95% of the variance in the data?
+
+-   Does the data cluster well into the known groups of species?
+
+::: {.class style="color: firebrick"}
+1.  According to the eigenvectors, the petal length, petal width, and sepal length tend to load on PC1. The magnitude of the associated eigenvalues is larger for the petal traits that the sepal length, which indicates that the variance of PC1 is more greatly explained by the petal traits.
+
+2.  You would only need PC1 and PC2, given that these two principle components explain over 95% of the total variance in the data.
+
+3.  Yes, the data points within the clusters for each species seem to be strongly associated with other data points within the same species.
+:::
+
+## 4. Analyzing housing data (11 points)
+
+### 4.a. Loading data (1 point)
+
+load the `housing_Final_Exam` dataset on your own similar to the Tumor data
+
+-   Put the file in a separate data/ folder in your Rproject folder
+
+-   Load the `.csv` file using `relative path` starting from the folder this `.qmd` file is in
+
+```{r load-housing-data}
+
+housing <- read.csv('Housing_Final_Exam.csv')
+```
+
+First take a look at the data! Look at all the columns and try to understand what they mean. Now, create a new column called 'price_per_area' that contains the price divided by the square footage of the house. Plot this new column as a histogram and describe it's relationship.
+
+For our future plots, it may get confusing to have such larger numbers for our y axis. To simplify this, divide the sales price by a thousand with a new column called 'price_thousands'.
+
+```{r create new price_per_area column}
+housing <- housing %>%
+  mutate(price_per_area = price / area ) %>%
+  mutate(price_thousands = price / 1000)
+```
+
+```{r plot a histogram of the price per area distribution}
+housing %>% 
+  ggplot(aes(x = price_per_area)) +
+  geom_histogram(color = "black", fill = "blue") +
+  labs(x = "Price Per Area", y = "Frequency") + 
+  theme_bw()
+  
+```
+
+### 4.b. Data Investigation (3 points total)
+
+Create three plots to investigate the relationship between *a different variable* and *house price*. One plot must be for a numeric variable and two for categorical variables. For the two categorical variables one must be a binary categorical variable. *Consider this carefully!* **Describe the relationship you see for each. All columns except price and area should be treated as factors! Properly label all axises along with the units!**
+
+Axis labels should be like this with the units in the bracket: `length (cm)`
+
+```{r numeric plot}
+
+plt_hous <-
+  {ggplot(housing, aes(x = area, y = price_thousands)) +
+  geom_point()} %>% print
+
+# plotly::ggplotly(plt_hous, dynamicTicks = T)  # interactive plot
+```
+
+::: {.class style="color: firebrick"}
+There seems to be a strong positive linear correlation between area and price. As Area increases price increases. There are a few possible outliers but overall the trend is consistent.
+:::
+
+```{r binary categorical variable}
+housing %>%   ggplot(aes(x = as.factor(basement), y = price_thousands)) +   geom_boxplot()
+```
+
+::: {.class style="color: firebrick"}
+There seems to be a relationship between the presence of the basement and the price of the home. Both groups look approximately normally distributed but the mean of the homes that do have a basement seems to be slightly higher than those that do not.
+:::
+
+```{r second categorical variable}
+housing %>%   ggplot(aes(x = as.factor(stories), y = price_thousands)) +   geom_boxplot()
+```
+
+::: {.class style="color: firebrick"}
+There seems to be a relationship between the presence of the basement and the price of the home. Both groups look approximately normally distributed but the mean of the homes that do have a basement seems to be slightly higher than those that do not.
+:::
+
+### 4.c. Simple linear regression model (3 points)
+
+Now you want to create the optimal model possible! You are confident that area is going to have the largest effect on sales price. Create a univariate linear regression model for `price_thousands` and `area`. Check to make sure the data meets the assumptions for linear regression. Show the output from the model.
+
+-   **Describe the null and alternative hypothesis**
+
+-   **Determine if we should accept or reject it.**
+
+-   **Describe the relationship of the model (i.e. strong, weak, negative...)**
+
+-   **Interpret the model that is produced. What are the coefficients and how do we interpret them?**
+
+```{r model creation}
+model1 <- lm(housing$price ~ housing$area)
+summary(model1)
+```
+
+::: {.class style="color: firebrick"}
+**Null:**
+
+Our null hypothesis is that the area of the house does not effect the price of the house.
+
+**Alternative:**
+
+Our alternative hypothesis is that the area does have a significant effect on the price of the house.
+
+**Accept or Reject:**
+
+From our linear regression model. We can reject the null hypothesis that the area of the house does not affect it's price. We accept the alternative hypothesis as the p-value is \~0 (\<.05).
+
+**Relationship:**
+
+There seems to be a strong linear relationship between price and area.
+
+**Interpretation of Model:**
+
+Our intercept is 238,000 dollars this means that in theory, if a house had 0 square feet it would cost 238,000. Therefore for each additional square foot, the house increases in price by 46 dollars!
+:::
+
+### 4.d. multivariate modelling (4 point)
+
+#### 4.d.1. Choosing variables for multivariate linear regression (1 point)
+
+Now that you are confident that area plays a significant role in affect a houses price, what are other variables that are important? To maintain the independency assumption of linear regression, we want to use variables that won't be directly correlated with area. What are some variables that are likely strongly correlated with area? **Explain your reasoning.**
+
+::: {.class style="color: firebrick"}
+Answer: Bedroom, bathrooms, possibly basement, number of stories
+:::
+
+#### 4.d.2. Multivariate modelling (3 point)
+
+Add one of the variables that **is not correlated with area to your model.** Create a second linear regression model and once again show it's output.
+
+-   **Describe the null and alternative hypothesis**
+
+-   **Determine if we should accept or reject it.**
+
+-   **Describe the relationship of the model (i.e. strong, weak, negative...)**
+
+-   **Interpret the model that is produced. What are the coefficients and how do we interpret them?**
+
+```{r}
+model2 <- lm(housing$price ~ housing$area + housing$parking)
+
+summary(model2)
+```
+
+::: {.class style="color: firebrick"}
+**Null:**
+
+Our null hypothesis (for each coefficient) is that neither the area of the house nor the number of parking spots significantly effect the price of the house.
+
+**Alternative:**
+
+Our alternative hypothesis is that the area or the number of parking spots have a significant effect on the price of the house.
+
+**Accept or Reject:**
+
+From our linear regression model. We can reject the null hypothesis that neither the area or number of parking spots does not affect it's price. We accept the alternative hypothesis as the p-value is \~0 (\<.05) for both x variables.
+
+**Relationship:**
+
+There seems to be a strong linear relationship of number of parking spots and area with housing price
+
+**Interpretation of Model:**
+
+Our intercept is 240,000 dollars this means that in theory, if a house had 0 square feet and 0 parking spaces it would cost 240,000. Holding all else constant, for each additional square foot, the price increases by 39 dollars. Holding all else constant, for each additional parking spot, the price increases by 48,000 dollars.
+:::
+
+# Attributions
+
+## Questions
+
+For the questions, I would like to acknowledge these sources of inspiration
+
+-   Annie and Sam for making all these creative questions
+
+-   Nice list of [css colours](https://duckduckgo.com/?t=ffab&q=css+colours&ia=answer&iax=answer) to format a `.class` of text in a particular colour to distinguish it from questions (*if you are curious, you can change the colour of all your answers from firebrick to something else by doing* `find-and-replace` in the `Source` mode! **+1 bonus point** for this)
+
+## Solutions
+
+::: {.class style="color: firebrick"}
+Thank you to the two students who generously allowed their answers to be used verbatim for a few questions of the rubric!
+:::
+
+::: {style="color: teal"}
+Space for TA/grader comments here!
+
+(copy this in the middle of the code for more elaborate comments)
+:::
